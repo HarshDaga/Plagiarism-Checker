@@ -1,0 +1,40 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Plagiarism Checker", "Plagiarism Checker\Plagiarism Checker.csproj", "{F01C27B8-AEE4-47E4-91BA-C0FC05D21158}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GCC Optimizer", "GCC Optimizer\GCC Optimizer.csproj", "{D5B6CD6B-5124-4EEE-A4CF-7E72D50797C8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FlowGraph", "FlowGraph\FlowGraph.csproj", "{10EC4334-86E6-47AF-9498-77DC41FBD1E1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProgramTests", "ProgramTests\ProgramTests.csproj", "{76C66EE9-8DB6-459E-A6C8-1399F84C1942}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F01C27B8-AEE4-47E4-91BA-C0FC05D21158}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F01C27B8-AEE4-47E4-91BA-C0FC05D21158}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F01C27B8-AEE4-47E4-91BA-C0FC05D21158}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F01C27B8-AEE4-47E4-91BA-C0FC05D21158}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D5B6CD6B-5124-4EEE-A4CF-7E72D50797C8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D5B6CD6B-5124-4EEE-A4CF-7E72D50797C8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D5B6CD6B-5124-4EEE-A4CF-7E72D50797C8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D5B6CD6B-5124-4EEE-A4CF-7E72D50797C8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{10EC4334-86E6-47AF-9498-77DC41FBD1E1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{10EC4334-86E6-47AF-9498-77DC41FBD1E1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{10EC4334-86E6-47AF-9498-77DC41FBD1E1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{10EC4334-86E6-47AF-9498-77DC41FBD1E1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{76C66EE9-8DB6-459E-A6C8-1399F84C1942}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{76C66EE9-8DB6-459E-A6C8-1399F84C1942}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{76C66EE9-8DB6-459E-A6C8-1399F84C1942}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{76C66EE9-8DB6-459E-A6C8-1399F84C1942}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
