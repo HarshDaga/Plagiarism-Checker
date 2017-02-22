@@ -6,8 +6,6 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading;
-using System.Threading.Tasks;
 
 #pragma warning disable CS1591
 
@@ -32,24 +30,34 @@ namespace GCC_Optimizer
 	{
 		[Description ( "bmp" )]
 		bmp,
+
 		[Description ( "gif" )]
 		gif,
+
 		[Description ( "ico" )]
 		ico,
+
 		[Description ( "jpg" )]
 		jpg,
+
 		[Description ( "pdf" )]
 		pdf,
+
 		[Description ( "plain" )]
 		plain,
+
 		[Description ( "png" )]
 		png,
+
 		[Description ( "ps" )]
 		ps,
+
 		[Description ( "svg" )]
 		svg,
+
 		[Description ( "tga" )]
 		tga,
+
 		[Description ( "vml" )]
 		vml
 	}
@@ -155,7 +163,7 @@ namespace GCC_Optimizer
 		/// Compile, Optimize and Convert the output given the source filename.
 		/// </summary>
 		/// <returns></returns>
-		bool CompileAndOptimize ( )
+		private bool CompileAndOptimize ( )
 		{
 			string cmd = $"gcc {gccFlags} \"" + fileName + "\"\n";
 			var results = ExecCmd ( cmd );
@@ -209,7 +217,7 @@ namespace GCC_Optimizer
 		/// </summary>
 		/// <param name="original">Original GIMPLE file.</param>
 		/// <returns></returns>
-		static List<string> CleanGIMPLE ( List<string> original )
+		private static List<string> CleanGIMPLE ( List<string> original )
 		{
 			List<string> clean = new List<string> ( );
 			int start = 0;

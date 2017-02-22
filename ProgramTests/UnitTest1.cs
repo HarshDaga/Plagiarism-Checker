@@ -1,7 +1,6 @@
-﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using FlowGraph;
+﻿using FlowGraph;
 using GCC_Optimizer;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace ProgramTests
 {

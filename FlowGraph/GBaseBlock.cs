@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 #pragma warning disable CS1591
 
@@ -16,8 +13,114 @@ namespace FlowGraph
 	/// </summary>
 	public class GVar
 	{
+		public class DefineUseChain
+		{
+			public class DefineUseChainEntry
+			{
+				public int block;
+				public int line;
+
+				public DefineUseChainEntry ( int block, int line )
+				{
+					this.block = block;
+					this.line = line;
+				}
+
+				public static bool operator == ( DefineUseChainEntry lhs, DefineUseChainEntry rhs )
+				{
+					return lhs.block == rhs.block && lhs.line == rhs.line;
+				}
+
+				public static bool operator != ( DefineUseChainEntry lhs, DefineUseChainEntry rhs )
+				{
+					return lhs.block != rhs.block || lhs.line != rhs.line;
+				}
+
+				public override bool Equals ( object obj )
+				{
+					if ( obj is DefineUseChainEntry )
+						return this == ( obj as DefineUseChainEntry );
+					return base.Equals ( obj );
+				}
+
+				public override int GetHashCode ( )
+				{
+					return ( block << 16 ) | line;
+				}
+
+				public override string ToString ( )
+				{
+					return $"Block: {block} Line: {line}";
+				}
+			}
+
+			public HashSet<DefineUseChainEntry> data = new HashSet<DefineUseChainEntry>();
+
+			//public DefineUseChainEntry this[int i]
+			//{
+			//	get
+			//	{
+			//		return data[i];
+			//	}
+			//}
+
+			public void add ( int block, int line )
+			{
+				data.Add ( new DefineUseChainEntry ( block, line ) );
+			}
+
+			public static bool operator == ( DefineUseChain lhs, DefineUseChain rhs )
+			{
+				if ( lhs.data.Count != rhs.data.Count )
+					return false;
+				return lhs.data.SetEquals ( rhs.data );
+			}
+
+			public static bool operator != ( DefineUseChain lhs, DefineUseChain rhs )
+			{
+				return !( lhs == rhs );
+			}
+
+			public override bool Equals ( object obj )
+			{
+				if ( obj is DefineUseChain )
+					return this == ( obj as DefineUseChain );
+				return base.Equals ( obj );
+			}
+
+			public override int GetHashCode ( )
+			{
+				return base.GetHashCode ( );
+			}
+
+		}
+
 		public string name { get; set; }
 		public string type { get; set; }
+
+		public DefineUseChain ducAssignments { get; set; }
+		public DefineUseChain ducReferences { get; set; }
+
+		public GVar ( )
+		{
+			ducAssignments = new DefineUseChain ( );
+			ducReferences = new DefineUseChain ( );
+		}
+
+		public decimal map ( GVar v )
+		{
+			decimal result = 0m;
+			if ( ducAssignments == v.ducAssignments )
+				result += .5m;
+			if ( ducReferences == v.ducReferences )
+				result += .5m;
+			return result;
+		}
+
+		public override string ToString ( )
+		{
+			return $"{type} {name}";
+		}
 	}
 
 	//public class GValue
@@ -87,14 +190,17 @@ namespace FlowGraph
 		/// <see cref="List{T}"/> of <see cref="GimpleStmt"/> containing all the statements used in the block.
 		/// </summary>
 		public List<GimpleStmt> gStatements { get; private set; } = new List<GimpleStmt> ( );
+
 		/// <summary>
 		/// <see cref="List{T}"/> of <see cref="GimpleStmt"/> containing all the blocks referenced from <c>this</c> block.
 		/// </summary>
 		public List<GBaseBlock> outEdges { get; set; } = new List<GBaseBlock> ( );
+
 		/// <summary>
 		/// <see cref="List{T}"/> of <see cref="GimpleStmt"/> containing all the blocks that reference <c>this</c> block.
 		/// </summary>
 		public List<GBaseBlock> inEdges { get; set; } = new List<GBaseBlock> ( );
+
 		public HashSet<string> vars { get; private set; } = new HashSet<string> ( );
 
 		/// <summary>
@@ -168,15 +274,25 @@ namespace FlowGraph
 				throw new ArgumentOutOfRangeException ( );
 			var gBlockDecl = new GBBStmt ( block[0] );
 			number = gBlockDecl.number;
+			int line = 1;
 			foreach ( var stmt in block )
 			{
 				var gStmt = toGimpleStmt ( stmt );
 				if ( gStmt != null )
 				{
+					gStmt.num = line;
 					gStatements.Add ( gStmt );
 					vars.UnionWith ( gStmt.vars );
 				}
+				++line;
 			}
+		}
+
+		public HashSet<string> Rename ( string oldName, string newName )
+		{
+			vars.Clear ( );
+			gStatements.ForEach ( stmt => vars.UnionWith ( stmt.Rename ( oldName, newName ) ) );
+			return vars;
 		}
 
 		/// <summary>

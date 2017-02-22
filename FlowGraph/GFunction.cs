@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 #pragma warning disable CS1591
 
@@ -18,42 +16,56 @@ namespace FlowGraph
 		/// All lines in the GIMPLE file.
 		/// </summary>
 		public List<string> gimple { get; private set; }
+
 		/// <summary>
 		/// Name of the function.
 		/// </summary>
 		public string name { get; private set; }
+
 		/// <summary>
 		/// funcdef_no of the function.
 		/// </summary>
 		public int funcdef_no { get; private set; }
+
 		/// <summary>
 		/// decl_uid of the function.
 		/// </summary>
 		public int decl_uid { get; private set; }
+
 		/// <summary>
 		/// symbol_order of the function.
 		/// </summary>
 		public int symbol_order { get; private set; }
+
 		/// <summary>
 		/// Functions formal arguments.
 		/// </summary>
 		public string args { get; private set; }
+
 		/// <summary>
 		/// All the <see cref="GBaseBlock"/>s in the function.
 		/// </summary>
 		public List<GBaseBlock> blocks { get; private set; } = new List<GBaseBlock> ( );
+
 		/// <summary>
 		/// <see cref="Dictionary{TKey, TValue}"/> of <see cref="int"/> mapped to <see cref="GBaseBlock"/> by the number.
 		/// </summary>
 		public Dictionary<int, GBaseBlock> blockMap { get; private set; } = new Dictionary<int, GBaseBlock> ( );
+
 		/// <summary>
 		/// <see cref="HashSet{T}"/> of all the <see cref="GVar"/> declared in the function.
 		/// </summary>
 		public HashSet<GVar> gVarsDecl { get; set; } = new HashSet<GVar> ( );
+
 		/// <summary>
 		/// <see cref="HashSet{T}"/> of all the variable names used in the function as <see cref="string"/>.
 		/// </summary>
 		public HashSet<string> gVarsUsed { get; set; } = new HashSet<string> ( );
+
+		/// <summary>
+		/// <see cref="Dictionary{TKey, TValue}"/> of <see cref="string"/> mapped to <see cref="GVar"/> by the variable name with its GIMPLE suffix.
+		/// </summary>
+		public Dictionary<string, GVar> usedToDeclMap { get; set; } = new Dictionary<string, GVar> ( );
 
 		/// <summary>
 		/// Build all the <see cref="GBaseBlock"/>s and other members using the GIMPLE input file.
@@ -93,7 +105,7 @@ namespace FlowGraph
 			createEdges ( );
 		}
 
-		static HashSet<GVar> getVarsDecl ( List<string> gimple )
+		private static HashSet<GVar> getVarsDecl ( List<string> gimple )
 		{
 			HashSet<GVar> vars = new HashSet<GVar> ( );
 			foreach ( var line in gimple )
@@ -113,16 +125,61 @@ namespace FlowGraph
 			return vars;
 		}
 
-		void getVarsUsed ( )
+		private void getVarsUsed ( )
 		{
 			foreach ( var block in blocks )
 				gVarsUsed.UnionWith ( block.vars );
+			foreach ( var used in gVarsUsed )
+			{
+				foreach ( var v in gVarsDecl )
+				{
+					if ( Regex.IsMatch ( used, $"{v.name}(_[0123456789]+)?" ) )
+					{
+						usedToDeclMap[used] = v;
+					}
+				}
+			}
+
+			foreach ( var block in blocks )
+			{
+				gVarsUsed.UnionWith ( block.vars );
+				foreach ( var stmt in block.gStatements )
+				{
+					if ( stmt is GAssignStmt || stmt is GPhiStmt )
+					{
+						usedToDeclMap[stmt.vars[0]].ducAssignments.add ( block.number, stmt.num );
+						for ( int i = 1; i < stmt.vars.Count; ++i )
+							usedToDeclMap[stmt.vars[i]].ducReferences.add ( block.number, stmt.num );
+					}
+					else
+					{
+						foreach ( var v in stmt.vars )
+							usedToDeclMap[v].ducReferences.add ( block.number, stmt.num );
+					}
+				}
+			}
 		}
 
-		void createEdges ( )
+		// **TODO**
+		///
+		//public void Rename ( string oldName, string newName )
+		//{
+		//	Dictionary<string, string> newNameMap = new Dictionary<string, string> ( );
+		//	foreach ( var v in usedToDeclMap )
+		//	{
+
+		//	}
+		//	blocks.ForEach ( b => b.Rename ( oldName, newName ) );
+		//	gVarsDecl.Clear ( );
+		//	gVarsUsed.Clear ( );
+		//	usedToDeclMap.Clear ( );
+		//}
+
+		private void createEdges ( )
 		{
 			foreach ( var block in blocks )
 				blockMap[block.number] = block;
+
 			foreach ( var block in blocks )
 			{
 				var numbers = block.getOutEdges ( );
@@ -144,6 +201,26 @@ namespace FlowGraph
 		/// <returns></returns>
 		public static bool operator == ( GFunction lhs, GFunction rhs )
 		{
+			var varMap = lhs.getVarMap ( rhs );
+			foreach ( var pair in varMap )
+			{
+				var duc = pair.Value.ducAssignments.data.Union ( pair.Value.ducReferences.data ).ToList ( );
+				foreach ( var entry in duc )
+				{
+					var lhsStmt = lhs.blockMap[entry.block].gStatements[entry.line - 1];
+					var rhsStmt = rhs.blockMap[entry.block].gStatements[entry.line - 1];
+					if ( rhsStmt.vars.Count == lhsStmt.vars.Count )
+					{
+						for ( int i = 0; i < lhsStmt.vars.Count; ++i )
+						{
+							string lvar = lhsStmt.vars[i];
+							string rvar = rhsStmt.vars[i];
+							if ( rhs.usedToDeclMap.ContainsKey ( rvar ) && varMap[lhs.usedToDeclMap[lvar]] == rhs.usedToDeclMap[rvar] )
+								rhsStmt.Rename ( rvar, lvar );
+						}
+					}
+				}
+			}
 			return lhs.blocks.SequenceEqual ( rhs.blocks );
 		}
 
@@ -158,20 +235,27 @@ namespace FlowGraph
 			return !( lhs == rhs );
 		}
 
-        public override bool Equals ( object obj )
-        {
-            if ( obj is GFunction )
-                return this == ( obj as GFunction );
-            return base.Equals ( obj );
-        }
+		public override bool Equals ( object obj )
+		{
+			if ( obj is GFunction )
+				return this == ( obj as GFunction );
+			return base.Equals ( obj );
+		}
 
-        public override int GetHashCode ( )
-        {
-            return base.GetHashCode ( );
-        }
-        //public Dictionary<string, string> getVarMap ( GFunction gFunc )
-        //{
+		public override int GetHashCode ( )
+		{
+			return base.GetHashCode ( );
+		}
 
-        //}
-    }
+		public Dictionary<GVar, GVar> getVarMap ( GFunction gFunc )
+		{
+			Dictionary<GVar, GVar> varMap = new Dictionary<GVar, GVar> ( );
+			foreach ( var v1 in gVarsDecl )
+				foreach ( var v2 in gFunc.gVarsDecl )
+					if ( v1.map ( v2 ) == 1m )
+						varMap[v1] = v2;
+
+			return varMap;
+		}
+	}
 }
