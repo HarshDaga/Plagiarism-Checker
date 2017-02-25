@@ -76,9 +76,9 @@ namespace ProgramTests
 		public void Datatype ( )
 		{
 			GFunction fib = getGFunction ( "fib.c" );
-			GFunction fib_redundant_var = getGFunction ( "fib datatype.c" );
+			GFunction fib_datatype = getGFunction ( "fib datatype.c" );
 
-			Assert.IsTrue ( fib == fib_redundant_var );
+			Assert.IsTrue ( fib_datatype == fib );
 		}
 
 		[TestMethod]

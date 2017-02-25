@@ -54,15 +54,7 @@ namespace FlowGraph
 				}
 			}
 
-			public HashSet<DefineUseChainEntry> data = new HashSet<DefineUseChainEntry>();
-
-			//public DefineUseChainEntry this[int i]
-			//{
-			//	get
-			//	{
-			//		return data[i];
-			//	}
-			//}
+			public HashSet<DefineUseChainEntry> data = new HashSet<DefineUseChainEntry> ( );
 
 			public void add ( int block, int line )
 			{
@@ -93,6 +85,11 @@ namespace FlowGraph
 				return base.GetHashCode ( );
 			}
 
+			public override string ToString ( )
+			{
+				return string.Join ( "\n", data );
+			}
+
 		}
 
 		public string name { get; set; }
@@ -110,11 +107,61 @@ namespace FlowGraph
 		public decimal map ( GVar v )
 		{
 			decimal result = 0m;
-			if ( ducAssignments == v.ducAssignments )
-				result += .5m;
-			if ( ducReferences == v.ducReferences )
-				result += .5m;
+			{
+				var common = v.ducAssignments.data.Intersect ( ducAssignments.data ).ToList ( ).Count;
+				result += ( 1m * common ) / ( v.ducAssignments.data.Count + ducAssignments.data.Count );
+			}
+			{
+				var common = v.ducReferences.data.Intersect ( ducReferences.data ).ToList ( ).Count;
+				result += ( 1m * common ) / ( v.ducReferences.data.Count + ducReferences.data.Count );
+			}
+			//if ( ducAssignments == v.ducAssignments )
+			//	result += .5m;
+			//if ( ducReferences == v.ducReferences )
+			//	result += .5m;
 			return result;
+		}
+
+		public decimal map ( List<GVar> vars )
+		{
+			var unionAssignments = new HashSet<DefineUseChain.DefineUseChainEntry> ( vars.SelectMany ( v => v.ducAssignments.data ) );
+			var unionRefereces = new HashSet<DefineUseChain.DefineUseChainEntry> ( vars.SelectMany ( v => v.ducReferences.data ) );
+			decimal result = 0m;
+			{
+				var common = unionAssignments.Intersect ( ducAssignments.data ).ToList ( ).Count;
+				result += ( 1m * common ) / ( unionAssignments.Count + ducAssignments.data.Count );
+			}
+			{
+				var common = unionRefereces.Intersect ( ducReferences.data ).ToList ( ).Count;
+				result += ( 1m * common ) / ( unionRefereces.Count + ducReferences.data.Count );
+			}
+			//if ( ducAssignments == v.ducAssignments )
+			//	result += .5m;
+			//if ( ducReferences == v.ducReferences )
+			//	result += .5m;
+			return result;
+		}
+
+		public static bool operator == ( GVar lhs, GVar rhs )
+		{
+			return lhs.name == rhs.name;
+		}
+
+		public static bool operator != ( GVar lhs, GVar rhs )
+		{
+			return lhs.name != rhs.name;
+		}
+
+		public override bool Equals ( object obj )
+		{
+			if ( obj is GVar )
+				return ( obj as GVar ).name == name;
+			return base.Equals ( obj );
+		}
+
+		public override int GetHashCode ( )
+		{
+			return name.GetHashCode ( );
 		}
 
 		public override string ToString ( )
@@ -254,6 +301,7 @@ namespace FlowGraph
                 typeof (GCallStmt),
 				typeof (GPhiStmt),
 				typeof (GAssignStmt),
+				typeof (GCastStmt),
 				typeof (GReturnStmt)
 			};
 			foreach ( var type in types )
@@ -280,12 +328,18 @@ namespace FlowGraph
 				var gStmt = toGimpleStmt ( stmt );
 				if ( gStmt != null )
 				{
-					gStmt.num = line;
+					gStmt.linenum = line;
 					gStatements.Add ( gStmt );
 					vars.UnionWith ( gStmt.vars );
 				}
 				++line;
 			}
+		}
+
+		public void RenumberLines ( )
+		{
+			for ( int i = 0; i != gStatements.Count; ++i )
+				gStatements[i].linenum = i + 1;
 		}
 
 		public HashSet<string> Rename ( string oldName, string newName )
@@ -345,6 +399,11 @@ namespace FlowGraph
 		public override int GetHashCode ( )
 		{
 			return base.GetHashCode ( );
+		}
+
+		public override string ToString ( )
+		{
+			return string.Join ( "\n", gStatements );
 		}
 	}
 }

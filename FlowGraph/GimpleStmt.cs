@@ -68,6 +68,12 @@ namespace FlowGraph
 		GASSIGN,
 
 		/// <summary>
+		/// Casting statement
+		/// </summary>
+		[Description ( "Casting" )]
+		GCAST,
+
+		/// <summary>
 		/// Return statement
 		/// </summary>
 		[Description ( "Return" )]
@@ -88,7 +94,7 @@ namespace FlowGraph
 		/// <summary>
 		/// Line number.
 		/// </summary>
-		public int num { get; set; }
+		public int linenum { get; set; }
 
 		/// <summary>
 		/// Type of statement.
@@ -229,7 +235,7 @@ namespace FlowGraph
 	/// </summary>
 	public class GCondStmt : GimpleStmt
 	{
-		private static string myPattern = @"if \((?<op1>\S*) (?<op>\S*) (?<op2>\S*)\)";
+		private static string myPattern = @"if \((?<op1>[\w\.]*) (?<op>\S*) (?<op2>[\w\.]*)\)";
 
 		public string op1 { get; private set; }
 		public string op2 { get; private set; }
@@ -412,8 +418,7 @@ namespace FlowGraph
 			return base.Rename ( oldName, newName );
 		}
 	}
-
-	// TODO: args as List<string>
+	
 	/// <summary>
 	/// Represents a <see cref="GimpleStmtType.GCALL"/>.
 	/// </summary>
@@ -432,7 +437,7 @@ namespace FlowGraph
 			var match = Regex.Match ( text, myPattern );
 			funcname = match.Groups["funcname"].Value;
 			string strArgs = match.Groups["args"].Value;
-			var matches = Regex.Matches ( strArgs, @"((\"".*\"")|(\w)(,\s*(\"".*\"")|(\w))*)" );
+			var matches = Regex.Matches ( strArgs, @"((\"".*\"")|([\w\.])(,\s*(\"".*\"")|([\w\.]))*)" );
 			foreach ( Match m in matches )
 			{
 				args.Add ( m.Value );
@@ -471,7 +476,7 @@ namespace FlowGraph
 	/// </summary>
 	public class GPhiStmt : GimpleStmt
 	{
-		private static string myPattern = @"# (?<assignee>\S*) = PHI <(?<var1>\S*)\((?<bb1>\S*)\)(, (?<var2>\S*)\((?<bb2>\S*)\))?>";
+		private static string myPattern = @"# (?<assignee>[\w\.]*) = PHI <(?<var1>[\w\.]*)\((?<bb1>\S*)\)(, (?<var2>[\w\.]*)\((?<bb2>\S*)\))?>";
 
 		public string assignee { get; private set; }
 		public string var1 { get; private set; }
@@ -527,7 +532,7 @@ namespace FlowGraph
 	/// </summary>
 	public class GAssignStmt : GimpleStmt
 	{
-		private static string myPattern = @"(?<assignee>\S*) = (?<var1>\S*)( (?<op>\S*) (?<var2>\S*))?;";
+		private static string myPattern = @"(?<assignee>[\w\.]*) = (?<var1>[\w\.]*)( (?<op>\S*) (?<var2>[\w\.]*))?;";
 
 		public string assignee { get; private set; }
 		public string var1 { get; private set; }
@@ -572,6 +577,55 @@ namespace FlowGraph
 				var1 = newName;
 			if ( object.Equals ( var2, oldName ) )
 				var2 = newName;
+			return base.Rename ( oldName, newName );
+		}
+	}
+
+	/// <summary>
+	/// Represents a <see cref="GimpleStmtType.GCAST"/>.
+	/// </summary>
+	public class GCastStmt : GimpleStmt
+	{
+		private static string myPattern = @"(?<assignee>[\w\.]*) = \((?<cast>.*)\)\s*(?<v>[\w\.]*);";
+
+		public string assignee { get; private set; }
+		public string cast { get; private set; }
+		public string v { get; private set; }
+
+		public GCastStmt ( string text )
+		{
+			this.text = text;
+			stmtType = GimpleStmtType.GCAST;
+			pattern = myPattern;
+			var match = Regex.Match ( text, myPattern );
+			assignee = match.Groups["assignee"].Value;
+			cast = match.Groups["cast"].Value;
+			v = match.Groups["v"].Value;
+			vars.AddRange ( new[] { assignee, v }.Where ( x => isValidIdentifier ( x ) ) );
+		}
+
+
+		/// <summary>
+		/// Compare given <paramref name="stmt"/> to <see cref="myPattern"/> using <see cref="Regex"/>.
+		/// </summary>
+		/// <param name="stmt"></param>
+		/// <returns></returns>
+		public static bool matches ( string stmt )
+		{
+			return Regex.IsMatch ( stmt, myPattern );
+		}
+
+		public override string ToString ( )
+		{
+			return $"{assignee} = ({cast}) {v};";
+		}
+
+		public override List<string> Rename ( string oldName, string newName )
+		{
+			if ( assignee == oldName )
+				assignee = newName;
+			if ( v == oldName )
+				v = newName;
 			return base.Rename ( oldName, newName );
 		}
 	}
