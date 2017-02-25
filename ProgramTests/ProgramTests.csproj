@@ -63,6 +63,19 @@
       <Name>GCC Optimizer</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="fib comments and indentation.c" />
+    <Content Include="fib datatype.c" />
+    <Content Include="fib loop reversed.c" />
+    <Content Include="fib macro.c" />
+    <Content Include="fib redundant expressions.c" />
+    <Content Include="fib redundant var.c" />
+    <Content Include="fib refactored.c" />
+    <Content Include="fib same.c" />
+    <Content Include="fib singular decl.c" />
+    <Content Include="fib var renamed.c" />
+    <Content Include="fib.c" />
+  </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">
       <ItemGroup>
