@@ -23,6 +23,12 @@ namespace FlowGraph
 		public string name { get; private set; }
 
 		/// <summary>
+		/// Threshold to be used when comparing variables (0 - 1)
+		/// Default: 0.95m
+		/// </summary>
+		public decimal threshold { get; set; } = 0.95m;
+
+		/// <summary>
 		/// funcdef_no of the function.
 		/// </summary>
 		public int funcdef_no { get; private set; }
@@ -108,6 +114,7 @@ namespace FlowGraph
 					continue;
 				body.Add ( line );
 			}
+
 			blocks = GBaseBlock.getBaseBlocks ( body );
 
 			getVarsDecl ( body );
@@ -249,6 +256,49 @@ namespace FlowGraph
 			);
 		}
 
+		private void preprocess ( GFunction gFunc )
+		{
+			var varMap = getVarMap ( gFunc );
+
+			foreach ( var pair in varMap )
+			{
+				var duc = pair.Value
+					.SelectMany ( x => x.ducAssignments.data )
+					.Union ( pair.Value.SelectMany ( x => x.ducReferences.data ) )
+					.ToList ( );
+
+				foreach ( var entry in duc )
+				{
+					var lhsStmt = blockMap[entry.block].gStatements[entry.line - 1];
+					var rhsStmt = gFunc.blockMap[entry.block].gStatements[entry.line - 1];
+
+					if ( rhsStmt.vars.Count == lhsStmt.vars.Count )
+					{
+						for ( int i = 0; i < lhsStmt.vars.Count; ++i )
+						{
+							string lvar = lhsStmt.vars[i];
+							string rvar = rhsStmt.vars[i];
+							if ( gFunc.usedToDeclMap.ContainsKey ( rvar ) &&
+								varMap[usedToDeclMap[lvar]].Contains ( gFunc.usedToDeclMap[rvar] ) )
+								rhsStmt.Rename ( rvar, lvar );
+						}
+					}
+				}
+			}
+		}
+
+		public decimal Compare ( GFunction gFunc )
+		{
+			preprocess ( gFunc );
+			decimal count = 0;
+			var lhsStmts = gStatements;
+			var rhsStmts = gFunc.gStatements;
+			for ( int i = 0; i < lhsStmts.Count && i < rhsStmts.Count; ++i )
+				if ( lhsStmts[i] == rhsStmts[i] )
+					++count;
+			return 200m * count / ( lhsStmts.Count + rhsStmts.Count );
+		}
+
 		/// <summary>
 		/// Compare the <see cref="GFunction.blocks"/> of both <see cref="GFunction"/> using <code>SequenceEqual()</code>.
 		/// </summary>
@@ -257,30 +307,7 @@ namespace FlowGraph
 		/// <returns></returns>
 		public static bool operator == ( GFunction lhs, GFunction rhs )
 		{
-			var varMap = lhs.getVarMap ( rhs );
-			foreach ( var pair in varMap )
-			{
-				var duc = pair.Value
-					.SelectMany ( x => x.ducAssignments.data )
-					.Union ( pair.Value.SelectMany ( x => x.ducReferences.data ) )
-					.ToList ( );
-				foreach ( var entry in duc )
-				{
-					var lhsStmt = lhs.blockMap[entry.block].gStatements[entry.line - 1];
-					var rhsStmt = rhs.blockMap[entry.block].gStatements[entry.line - 1];
-					if ( rhsStmt.vars.Count == lhsStmt.vars.Count )
-					{
-						for ( int i = 0; i < lhsStmt.vars.Count; ++i )
-						{
-							string lvar = lhsStmt.vars[i];
-							string rvar = rhsStmt.vars[i];
-							if ( rhs.usedToDeclMap.ContainsKey ( rvar ) &&
-								varMap[lhs.usedToDeclMap[lvar]].Contains ( rhs.usedToDeclMap[rvar] ) )
-								rhsStmt.Rename ( rvar, lvar );
-						}
-					}
-				}
-			}
+			lhs.preprocess ( rhs );
 			return lhs.blocks.SequenceEqual ( rhs.blocks );
 		}
 
@@ -329,7 +356,7 @@ namespace FlowGraph
 				foreach ( var v in probable )
 				{
 					minimal.Add ( v );
-					if ( v1.map ( minimal ) > 0.95m )
+					if ( v1.map ( minimal ) > threshold )
 					{
 						varMap[v1] = minimal;
 						break;
@@ -350,7 +377,7 @@ namespace FlowGraph
 					foreach ( var v in probable )
 					{
 						minimal.Add ( v );
-						if ( v1.map ( minimal ) > 0.95m )
+						if ( v1.map ( minimal ) > threshold )
 						{
 							minimal.ForEach ( m =>
 							{
