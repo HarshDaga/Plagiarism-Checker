@@ -90,6 +90,11 @@ namespace FlowGraph
 		/// <param name="gimple"><see cref="List{T}"/> of <see cref="string"/> from the GIMPLE source.</param>
 		public GFunction ( List<string> gimple )
 		{
+			initialize ( gimple );
+		}
+
+		private void initialize ( List<string> gimple )
+		{
 			this.gimple = gimple;
 			string pattern = @";; Function (?<name>\S*) \((\S*, funcdef_no=(?<funcdef_no>[0-9]*), decl_uid=(?<decl_uid>[0-9]*), cgraph_uid=[0-9]*, symbol_order=(?<symbol_order>[0-9]*))\).*";
 			bool insideFunc = false, insideBody = false;
@@ -286,7 +291,7 @@ namespace FlowGraph
 				}
 			}
 		}
-
+		
 		public decimal Compare ( GFunction gFunc )
 		{
 			preprocess ( gFunc );
@@ -296,7 +301,11 @@ namespace FlowGraph
 			for ( int i = 0; i < lhsStmts.Count && i < rhsStmts.Count; ++i )
 				if ( lhsStmts[i] == rhsStmts[i] )
 					++count;
-			return 200m * count / ( lhsStmts.Count + rhsStmts.Count );
+			decimal result = 200m * count / ( lhsStmts.Count + rhsStmts.Count );
+
+			gFunc.initialize ( gFunc.gimple );
+
+			return result;
 		}
 
 		/// <summary>
@@ -308,7 +317,11 @@ namespace FlowGraph
 		public static bool operator == ( GFunction lhs, GFunction rhs )
 		{
 			lhs.preprocess ( rhs );
-			return lhs.blocks.SequenceEqual ( rhs.blocks );
+			bool result = lhs.blocks.SequenceEqual ( rhs.blocks );
+
+			rhs.initialize ( rhs.gimple );
+
+			return result;
 		}
 
 		/// <summary>
@@ -355,6 +368,8 @@ namespace FlowGraph
 				var minimal = new List<GVar> ( );
 				foreach ( var v in probable )
 				{
+					if ( !v.isSubsetOf ( v1 ) )
+						continue;
 					minimal.Add ( v );
 					if ( v1.map ( minimal ) > threshold )
 					{

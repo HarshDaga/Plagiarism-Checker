@@ -228,6 +228,18 @@ namespace FlowGraph
 		{
 			return base.Rename ( oldName, newName );
 		}
+
+		public override bool Equals ( object obj )
+		{
+			if ( obj is GBBStmt )
+				return ToString ( ) == ( obj as GBBStmt ).ToString ( );
+			return base.Equals ( obj );
+		}
+
+		public override int GetHashCode ( )
+		{
+			return base.GetHashCode ( );
+		}
 	}
 
 	/// <summary>
@@ -313,6 +325,18 @@ namespace FlowGraph
 		{
 			return base.Rename ( oldName, newName );
 		}
+
+		public override bool Equals ( object obj )
+		{
+			if ( obj is GElseStmt )
+				return ToString ( ) == ( obj as GElseStmt ).ToString ( );
+			return base.Equals ( obj );
+		}
+
+		public override int GetHashCode ( )
+		{
+			return base.GetHashCode ( );
+		}
 	}
 
 	/// <summary>
@@ -352,6 +376,18 @@ namespace FlowGraph
 		public override List<string> Rename ( string oldName, string newName )
 		{
 			return base.Rename ( oldName, newName );
+		}
+
+		public override bool Equals ( object obj )
+		{
+			if ( obj is GGotoStmt )
+				return ToString ( ) == ( obj as GGotoStmt ).ToString ( );
+			return base.Equals ( obj );
+		}
+
+		public override int GetHashCode ( )
+		{
+			return base.GetHashCode ( );
 		}
 	}
 
@@ -469,6 +505,23 @@ namespace FlowGraph
 					args[i] = newName;
 			return base.Rename ( oldName, newName );
 		}
+
+		public override bool Equals ( object obj )
+		{
+			if ( obj is GCallStmt )
+			{
+				var stmt = obj as GCallStmt;
+				if ( funcname != stmt.funcname )
+					return false;
+				return vars.SequenceEqual ( stmt.vars );
+			}
+			return base.Equals ( obj );
+		}
+
+		public override int GetHashCode ( )
+		{
+			return base.GetHashCode ( );
+		}
 	}
 
 	/// <summary>
@@ -525,6 +578,18 @@ namespace FlowGraph
 				var2 = newName;
 			return base.Rename ( oldName, newName );
 		}
+
+		public override bool Equals ( object obj )
+		{
+			if ( obj is GPhiStmt )
+				return ToString ( ) == ( obj as GPhiStmt ).ToString ( );
+			return base.Equals ( obj );
+		}
+
+		public override int GetHashCode ( )
+		{
+			return base.GetHashCode ( );
+		}
 	}
 
 	/// <summary>
@@ -579,6 +644,18 @@ namespace FlowGraph
 				var2 = newName;
 			return base.Rename ( oldName, newName );
 		}
+
+		public override bool Equals ( object obj )
+		{
+			if ( obj is GAssignStmt )
+				return ToString ( ) == ( obj as GAssignStmt ).ToString ( );
+			return base.Equals ( obj );
+		}
+
+		public override int GetHashCode ( )
+		{
+			return base.GetHashCode ( );
+		}
 	}
 
 	/// <summary>
@@ -628,6 +705,18 @@ namespace FlowGraph
 				v = newName;
 			return base.Rename ( oldName, newName );
 		}
+
+		public override bool Equals ( object obj )
+		{
+			if ( obj is GCastStmt )
+				return ToString ( ) == ( obj as GCastStmt ).ToString ( );
+			return base.Equals ( obj );
+		}
+
+		public override int GetHashCode ( )
+		{
+			return base.GetHashCode ( );
+		}
 	}
 
 	/// <summary>
@@ -648,8 +737,7 @@ namespace FlowGraph
 			retval = match.Groups["retval"].Value;
 			vars.AddRange ( new[] { retval }.Where ( x => isValidIdentifier ( x ) ) );
 		}
-
-
+		
 		/// <summary>
 		/// Compare given <paramref name="stmt"/> to <see cref="myPattern"/> using <see cref="Regex"/>.
 		/// </summary>
@@ -671,6 +759,18 @@ namespace FlowGraph
 			if ( object.Equals ( retval, oldName ) )
 				retval = newName;
 			return base.Rename ( oldName, newName );
+		}
+
+		public override bool Equals ( object obj )
+		{
+			if ( obj is GReturnStmt )
+				return ToString ( ) == ( obj as GReturnStmt ).ToString ( );
+			return base.Equals ( obj );
+		}
+
+		public override int GetHashCode ( )
+		{
+			return base.GetHashCode ( );
 		}
 	}
 }

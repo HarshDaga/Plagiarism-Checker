@@ -104,6 +104,12 @@ namespace FlowGraph
 			ducReferences = new DefineUseChain ( );
 		}
 
+		public bool isSubsetOf ( GVar v )
+		{
+			return ( ducAssignments.data.IsSubsetOf ( v.ducAssignments.data ) &&
+				ducReferences.data.IsSubsetOf ( v.ducReferences.data ) );
+		}
+
 		public decimal map ( GVar v )
 		{
 			decimal result = 0m;
@@ -115,10 +121,6 @@ namespace FlowGraph
 				var common = v.ducReferences.data.Intersect ( ducReferences.data ).ToList ( ).Count;
 				result += ( 1m * common ) / ( v.ducReferences.data.Count + ducReferences.data.Count );
 			}
-			//if ( ducAssignments == v.ducAssignments )
-			//	result += .5m;
-			//if ( ducReferences == v.ducReferences )
-			//	result += .5m;
 			return result;
 		}
 
@@ -135,10 +137,6 @@ namespace FlowGraph
 				var common = unionRefereces.Intersect ( ducReferences.data ).ToList ( ).Count;
 				result += ( 1m * common ) / ( unionRefereces.Count + ducReferences.data.Count );
 			}
-			//if ( ducAssignments == v.ducAssignments )
-			//	result += .5m;
-			//if ( ducReferences == v.ducReferences )
-			//	result += .5m;
 			return result;
 		}
 
