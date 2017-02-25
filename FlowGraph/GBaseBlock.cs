@@ -113,14 +113,20 @@ namespace FlowGraph
 		public decimal map ( GVar v )
 		{
 			decimal result = 0m;
+			int totalAssignments = v.ducAssignments.data.Count + ducAssignments.data.Count;
+			int totalReferences = v.ducReferences.data.Count + ducReferences.data.Count;
+			if ( totalAssignments != 0 )
 			{
 				var common = v.ducAssignments.data.Intersect ( ducAssignments.data ).ToList ( ).Count;
-				result += ( 1m * common ) / ( v.ducAssignments.data.Count + ducAssignments.data.Count );
+				result += ( 1m * common ) / ( totalAssignments );
 			}
+			if ( totalReferences != 0 )
 			{
 				var common = v.ducReferences.data.Intersect ( ducReferences.data ).ToList ( ).Count;
-				result += ( 1m * common ) / ( v.ducReferences.data.Count + ducReferences.data.Count );
+				result += ( 1m * common ) / ( totalReferences );
 			}
+			if ( totalAssignments == 0 || totalReferences == 0 )
+				result *= 2m;
 			return result;
 		}
 
@@ -128,15 +134,21 @@ namespace FlowGraph
 		{
 			var unionAssignments = new HashSet<DefineUseChain.DefineUseChainEntry> ( vars.SelectMany ( v => v.ducAssignments.data ) );
 			var unionRefereces = new HashSet<DefineUseChain.DefineUseChainEntry> ( vars.SelectMany ( v => v.ducReferences.data ) );
+			int totalAssignments = unionAssignments.Count + ducAssignments.data.Count;
+			int totalReferences = unionRefereces.Count + ducReferences.data.Count;
 			decimal result = 0m;
+			if ( totalAssignments != 0 )
 			{
 				var common = unionAssignments.Intersect ( ducAssignments.data ).ToList ( ).Count;
-				result += ( 1m * common ) / ( unionAssignments.Count + ducAssignments.data.Count );
+				result += ( 1m * common ) / ( totalAssignments );
 			}
+			if ( totalReferences != 0 )
 			{
 				var common = unionRefereces.Intersect ( ducReferences.data ).ToList ( ).Count;
-				result += ( 1m * common ) / ( unionRefereces.Count + ducReferences.data.Count );
+				result += ( 1m * common ) / ( totalReferences );
 			}
+			if ( totalAssignments == 0 || totalReferences == 0 )
+				result *= 2m;
 			return result;
 		}
 
@@ -299,6 +311,7 @@ namespace FlowGraph
                 typeof (GCallStmt),
 				typeof (GPhiStmt),
 				typeof (GAssignStmt),
+				typeof (GOptimizedStmt),
 				typeof (GCastStmt),
 				typeof (GReturnStmt)
 			};

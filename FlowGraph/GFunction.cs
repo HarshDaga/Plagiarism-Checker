@@ -172,7 +172,7 @@ namespace FlowGraph
 			{
 				foreach ( var v in gVarsDecl )
 				{
-					if ( Regex.IsMatch ( used, $"{v.name}(_[0123456789]+)?" ) )
+					if ( Regex.IsMatch ( used, $"^{v.name}(_[0123456789]+)?$" ) )
 					{
 						usedToDeclMap[used] = v;
 					}
@@ -192,7 +192,7 @@ namespace FlowGraph
 				gVarsUsed.UnionWith ( block.vars );
 				foreach ( var stmt in block.gStatements )
 				{
-					if ( stmt is GAssignStmt || stmt is GPhiStmt )
+					if ( stmt is GAssignStmt || stmt is GPhiStmt || stmt is GOptimizedStmt )
 					{
 						usedToDeclMap[stmt.vars[0]].ducAssignments.add ( block.number, stmt.linenum );
 						for ( int i = 1; i < stmt.vars.Count; ++i )

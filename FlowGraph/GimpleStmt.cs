@@ -68,6 +68,12 @@ namespace FlowGraph
 		GASSIGN,
 
 		/// <summary>
+		/// Optimized statement
+		/// </summary>
+		[Description ( "Optimized" )]
+		GOPTIMIZED,
+
+		/// <summary>
 		/// Casting statement
 		/// </summary>
 		[Description ( "Casting" )]
@@ -243,6 +249,208 @@ namespace FlowGraph
 	}
 
 	/// <summary>
+	/// Represents a <see cref="GimpleStmtType.GPHI"/>.
+	/// </summary>
+	public class GPhiStmt : GimpleStmt
+	{
+		private static string myPattern = @"# (?<assignee>[\w\.]*) = PHI <(?<var1>[\w\.]*)\((?<bb1>\S*)\)(, (?<var2>[\w\.]*)\((?<bb2>\S*)\))?>";
+
+		public string assignee { get; private set; }
+		public string var1 { get; private set; }
+		public string var2 { get; private set; }
+		public string bb1 { get; private set; }
+		public string bb2 { get; private set; }
+
+		public GPhiStmt ( string text )
+		{
+			this.text = text;
+			stmtType = GimpleStmtType.GPHI;
+			pattern = myPattern;
+			var match = Regex.Match ( text, myPattern );
+			assignee = match.Groups["assignee"].Value;
+			var1 = match.Groups["var1"].Value;
+			var2 = match.Groups["var2"].Value;
+			bb1 = match.Groups["bb1"].Value;
+			bb2 = match.Groups["bb2"].Value;
+			vars.AddRange ( new[] { assignee, var1, var2 }.Where ( x => isValidIdentifier ( x ) ) );
+		}
+
+
+		/// <summary>
+		/// Compare given <paramref name="stmt"/> to <see cref="myPattern"/> using <see cref="Regex"/>.
+		/// </summary>
+		/// <param name="stmt"></param>
+		/// <returns></returns>
+		public static bool matches ( string stmt )
+		{
+			return Regex.IsMatch ( stmt, myPattern );
+		}
+
+		public override string ToString ( )
+		{
+			string second = var2 == "" ? "" : $", {var2}({bb2})";
+			return $"# {assignee} = PHI <{var1}({bb1}){second}>";
+		}
+
+		public override List<string> Rename ( string oldName, string newName )
+		{
+			if ( assignee == oldName )
+				assignee = newName;
+			if ( var1 == oldName )
+				var1 = newName;
+			if ( object.Equals ( var2, oldName ) )
+				var2 = newName;
+			return base.Rename ( oldName, newName );
+		}
+
+		public override bool Equals ( object obj )
+		{
+			if ( obj is GPhiStmt )
+				return ToString ( ) == ( obj as GPhiStmt ).ToString ( );
+			return base.Equals ( obj );
+		}
+
+		public override int GetHashCode ( )
+		{
+			return base.GetHashCode ( );
+		}
+	}
+
+	/// <summary>
+	/// Represents a <see cref="GimpleStmtType.GASSIGN"/>.
+	/// </summary>
+	public class GAssignStmt : GimpleStmt
+	{
+		private static string myPattern = @"(?<assignee>[\w\.]*) = (?<var1>[\w\.]*)( (?<op>\S*) (?<var2>[\w\.]*))?;";
+
+		public string assignee { get; private set; }
+		public string var1 { get; private set; }
+		public string var2 { get; private set; }
+		public string op { get; private set; }
+
+		public GAssignStmt ( string text )
+		{
+			this.text = text;
+			stmtType = GimpleStmtType.GASSIGN;
+			pattern = myPattern;
+			var match = Regex.Match ( text, myPattern );
+			assignee = match.Groups["assignee"].Value;
+			var1 = match.Groups["var1"].Value;
+			var2 = match.Groups["var2"].Value;
+			op = match.Groups["op"].Value;
+			vars.AddRange ( new[] { assignee, var1, var2 }.Where ( x => isValidIdentifier ( x ) ) );
+		}
+
+
+		/// <summary>
+		/// Compare given <paramref name="stmt"/> to <see cref="myPattern"/> using <see cref="Regex"/>.
+		/// </summary>
+		/// <param name="stmt"></param>
+		/// <returns></returns>
+		public static bool matches ( string stmt )
+		{
+			return Regex.IsMatch ( stmt, myPattern );
+		}
+
+		public override string ToString ( )
+		{
+			string second = var2 == "" ? "" : $" {op} {var2}";
+			return $"{assignee} = {var1}{second};";
+		}
+
+		public override List<string> Rename ( string oldName, string newName )
+		{
+			if ( assignee == oldName )
+				assignee = newName;
+			if ( var1 == oldName )
+				var1 = newName;
+			if ( object.Equals ( var2, oldName ) )
+				var2 = newName;
+			return base.Rename ( oldName, newName );
+		}
+
+		public override bool Equals ( object obj )
+		{
+			if ( obj is GAssignStmt )
+				return ToString ( ) == ( obj as GAssignStmt ).ToString ( );
+			return base.Equals ( obj );
+		}
+
+		public override int GetHashCode ( )
+		{
+			return base.GetHashCode ( );
+		}
+	}
+
+	/// <summary>
+	/// Represents a <see cref="GimpleStmtType.GOPTIMIZED"/>.
+	/// </summary>
+	public class GOptimizedStmt : GimpleStmt
+	{
+		private static string myPattern = @"(?<assignee>[\w\.]*) = (?<func>\w*)\s*<(?<args>.*)>;";
+
+		public string assignee { get; private set; }
+		public string func { get; private set; }
+		public List<string> args { get; private set; } = new List<string> ( );
+
+		public GOptimizedStmt ( string text )
+		{
+			this.text = text;
+			stmtType = GimpleStmtType.GCALL;
+			pattern = myPattern;
+			var match = Regex.Match ( text, myPattern );
+			assignee = match.Groups["assignee"].Value;
+			func = match.Groups["func"].Value;
+			string strArgs = match.Groups["args"].Value;
+			var matches = Regex.Matches ( strArgs, @"((\"".*\"")|([\w\.])(,\s*(\"".*\"")|([\w\.]))*)" );
+			vars.Add ( assignee );
+			foreach ( Match m in matches )
+			{
+				args.Add ( m.Value );
+				if ( isValidIdentifier ( m.Value ) )
+					vars.Add ( m.Value );
+			}
+		}
+		
+		/// <summary>
+		/// Compare given <paramref name="stmt"/> to <see cref="myPattern"/> using <see cref="Regex"/>.
+		/// </summary>
+		/// <param name="stmt"></param>
+		/// <returns></returns>
+		public static bool matches ( string stmt )
+		{
+			return Regex.IsMatch ( stmt, myPattern );
+		}
+
+		public override string ToString ( )
+		{
+			return $"{assignee} = {func} <{string.Join ( ", ", args )}>;";
+		}
+
+		public override List<string> Rename ( string oldName, string newName )
+		{
+			if ( assignee == oldName )
+				assignee = newName;
+			for ( int i = 0; i < args.Count; ++i )
+				if ( args[i] == oldName )
+					args[i] = newName;
+			return base.Rename ( oldName, newName );
+		}
+
+		public override bool Equals ( object obj )
+		{
+			if ( obj is GAssignStmt )
+				return ToString ( ) == ( obj as GAssignStmt ).ToString ( );
+			return base.Equals ( obj );
+		}
+
+		public override int GetHashCode ( )
+		{
+			return base.GetHashCode ( );
+		}
+	}
+
+	/// <summary>
 	/// Represents a <see cref="GimpleStmtType.GCOND"/>.
 	/// </summary>
 	public class GCondStmt : GimpleStmt
@@ -392,70 +600,6 @@ namespace FlowGraph
 	}
 
 	/// <summary>
-	/// Represents a <see cref="GimpleStmtType.GLABEL"/>.
-	/// </summary>
-	public class GLabelStmt : GimpleStmt
-	{
-		private static string myPattern = "goto <bb [0-9]*>;";
-
-		public GLabelStmt ( string text )
-		{
-			this.text = text;
-			stmtType = GimpleStmtType.GLABEL;
-			pattern = myPattern;
-			throw new NotImplementedException ( );
-		}
-
-
-		/// <summary>
-		/// Compare given <paramref name="stmt"/> to <see cref="myPattern"/> using <see cref="Regex"/>.
-		/// </summary>
-		/// <param name="stmt"></param>
-		/// <returns></returns>
-		public static bool matches ( string stmt )
-		{
-			return Regex.IsMatch ( stmt, myPattern );
-		}
-
-		public override List<string> Rename ( string oldName, string newName )
-		{
-			return base.Rename ( oldName, newName );
-		}
-	}
-
-	/// <summary>
-	/// Represents a <see cref="GimpleStmtType.GSWITCH"/>.
-	/// </summary>
-	public class GSwitchStmt : GimpleStmt
-	{
-		private static string myPattern = "goto <bb [0-9]*>;";
-
-		public GSwitchStmt ( string text )
-		{
-			this.text = text;
-			stmtType = GimpleStmtType.GSWITCH;
-			pattern = myPattern;
-			throw new NotImplementedException ( );
-		}
-
-
-		/// <summary>
-		/// Compare given <paramref name="stmt"/> to <see cref="myPattern"/> using <see cref="Regex"/>.
-		/// </summary>
-		/// <param name="stmt"></param>
-		/// <returns></returns>
-		public static bool matches ( string stmt )
-		{
-			return Regex.IsMatch ( stmt, myPattern );
-		}
-
-		public override List<string> Rename ( string oldName, string newName )
-		{
-			return base.Rename ( oldName, newName );
-		}
-	}
-	
-	/// <summary>
 	/// Represents a <see cref="GimpleStmtType.GCALL"/>.
 	/// </summary>
 	public class GCallStmt : GimpleStmt
@@ -515,140 +659,6 @@ namespace FlowGraph
 					return false;
 				return vars.SequenceEqual ( stmt.vars );
 			}
-			return base.Equals ( obj );
-		}
-
-		public override int GetHashCode ( )
-		{
-			return base.GetHashCode ( );
-		}
-	}
-
-	/// <summary>
-	/// Represents a <see cref="GimpleStmtType.GPHI"/>.
-	/// </summary>
-	public class GPhiStmt : GimpleStmt
-	{
-		private static string myPattern = @"# (?<assignee>[\w\.]*) = PHI <(?<var1>[\w\.]*)\((?<bb1>\S*)\)(, (?<var2>[\w\.]*)\((?<bb2>\S*)\))?>";
-
-		public string assignee { get; private set; }
-		public string var1 { get; private set; }
-		public string var2 { get; private set; }
-		public string bb1 { get; private set; }
-		public string bb2 { get; private set; }
-
-		public GPhiStmt ( string text )
-		{
-			this.text = text;
-			stmtType = GimpleStmtType.GPHI;
-			pattern = myPattern;
-			var match = Regex.Match ( text, myPattern );
-			assignee = match.Groups["assignee"].Value;
-			var1 = match.Groups["var1"].Value;
-			var2 = match.Groups["var2"].Value;
-			bb1 = match.Groups["bb1"].Value;
-			bb2 = match.Groups["bb2"].Value;
-			vars.AddRange ( new[] { assignee, var1, var2 }.Where ( x => isValidIdentifier ( x ) ) );
-		}
-
-
-		/// <summary>
-		/// Compare given <paramref name="stmt"/> to <see cref="myPattern"/> using <see cref="Regex"/>.
-		/// </summary>
-		/// <param name="stmt"></param>
-		/// <returns></returns>
-		public static bool matches ( string stmt )
-		{
-			return Regex.IsMatch ( stmt, myPattern );
-		}
-
-		public override string ToString ( )
-		{
-			string second = var2 == "" ? "" : $", {var2}({bb2})";
-			return $"# {assignee} = PHI <{var1}({bb1}){second}>";
-		}
-
-		public override List<string> Rename ( string oldName, string newName )
-		{
-			if ( assignee == oldName )
-				assignee = newName;
-			if ( var1 == oldName )
-				var1 = newName;
-			if ( object.Equals ( var2, oldName ) )
-				var2 = newName;
-			return base.Rename ( oldName, newName );
-		}
-
-		public override bool Equals ( object obj )
-		{
-			if ( obj is GPhiStmt )
-				return ToString ( ) == ( obj as GPhiStmt ).ToString ( );
-			return base.Equals ( obj );
-		}
-
-		public override int GetHashCode ( )
-		{
-			return base.GetHashCode ( );
-		}
-	}
-
-	/// <summary>
-	/// Represents a <see cref="GimpleStmtType.GASSIGN"/>.
-	/// </summary>
-	public class GAssignStmt : GimpleStmt
-	{
-		private static string myPattern = @"(?<assignee>[\w\.]*) = (?<var1>[\w\.]*)( (?<op>\S*) (?<var2>[\w\.]*))?;";
-
-		public string assignee { get; private set; }
-		public string var1 { get; private set; }
-		public string var2 { get; private set; }
-		public string op { get; private set; }
-
-		public GAssignStmt ( string text )
-		{
-			this.text = text;
-			stmtType = GimpleStmtType.GASSIGN;
-			pattern = myPattern;
-			var match = Regex.Match ( text, myPattern );
-			assignee = match.Groups["assignee"].Value;
-			var1 = match.Groups["var1"].Value;
-			var2 = match.Groups["var2"].Value;
-			op = match.Groups["op"].Value;
-			vars.AddRange ( new[] { assignee, var1, var2 }.Where ( x => isValidIdentifier ( x ) ) );
-		}
-
-
-		/// <summary>
-		/// Compare given <paramref name="stmt"/> to <see cref="myPattern"/> using <see cref="Regex"/>.
-		/// </summary>
-		/// <param name="stmt"></param>
-		/// <returns></returns>
-		public static bool matches ( string stmt )
-		{
-			return Regex.IsMatch ( stmt, myPattern );
-		}
-
-		public override string ToString ( )
-		{
-			string second = var2 == "" ? "" : $" {op} {var2}";
-			return $"{assignee} = {var1}{second};";
-		}
-
-		public override List<string> Rename ( string oldName, string newName )
-		{
-			if ( assignee == oldName )
-				assignee = newName;
-			if ( var1 == oldName )
-				var1 = newName;
-			if ( object.Equals ( var2, oldName ) )
-				var2 = newName;
-			return base.Rename ( oldName, newName );
-		}
-
-		public override bool Equals ( object obj )
-		{
-			if ( obj is GAssignStmt )
-				return ToString ( ) == ( obj as GAssignStmt ).ToString ( );
 			return base.Equals ( obj );
 		}
 
@@ -771,6 +781,70 @@ namespace FlowGraph
 		public override int GetHashCode ( )
 		{
 			return base.GetHashCode ( );
+		}
+	}
+
+	/// <summary>
+	/// Represents a <see cref="GimpleStmtType.GLABEL"/>.
+	/// </summary>
+	public class GLabelStmt : GimpleStmt
+	{
+		private static string myPattern = "goto <bb [0-9]*>;";
+
+		public GLabelStmt ( string text )
+		{
+			this.text = text;
+			stmtType = GimpleStmtType.GLABEL;
+			pattern = myPattern;
+			throw new NotImplementedException ( );
+		}
+
+
+		/// <summary>
+		/// Compare given <paramref name="stmt"/> to <see cref="myPattern"/> using <see cref="Regex"/>.
+		/// </summary>
+		/// <param name="stmt"></param>
+		/// <returns></returns>
+		public static bool matches ( string stmt )
+		{
+			return Regex.IsMatch ( stmt, myPattern );
+		}
+
+		public override List<string> Rename ( string oldName, string newName )
+		{
+			return base.Rename ( oldName, newName );
+		}
+	}
+
+	/// <summary>
+	/// Represents a <see cref="GimpleStmtType.GSWITCH"/>.
+	/// </summary>
+	public class GSwitchStmt : GimpleStmt
+	{
+		private static string myPattern = "goto <bb [0-9]*>;";
+
+		public GSwitchStmt ( string text )
+		{
+			this.text = text;
+			stmtType = GimpleStmtType.GSWITCH;
+			pattern = myPattern;
+			throw new NotImplementedException ( );
+		}
+
+
+		/// <summary>
+		/// Compare given <paramref name="stmt"/> to <see cref="myPattern"/> using <see cref="Regex"/>.
+		/// </summary>
+		/// <param name="stmt"></param>
+		/// <returns></returns>
+		public static bool matches ( string stmt )
+		{
+			return Regex.IsMatch ( stmt, myPattern );
+		}
+
+		public override List<string> Rename ( string oldName, string newName )
+		{
+			return base.Rename ( oldName, newName );
 		}
 	}
 }

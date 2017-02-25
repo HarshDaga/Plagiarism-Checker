@@ -75,6 +75,8 @@
     <Content Include="fib singular decl.c" />
     <Content Include="fib var renamed.c" />
     <Content Include="fib.c" />
+    <Content Include="max condition rev.c" />
+    <Content Include="max.c" />
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">
