@@ -90,7 +90,13 @@ namespace GCC_Optimizer
 			bool suppressOutput = true
 			)
 		{
-			this.fileName = fileName;
+			if ( fileName.Contains ( "\\" ) )
+			{
+				this.fileName = fileName.Substring ( fileName.LastIndexOf ( '\\' ) + 1 );
+				File.Copy ( fileName, this.fileName, true );
+			}
+			else
+				this.fileName = fileName;
 			this.batchFile = batchFile;
 			this.gccFlags = gccFlags;
 			if ( dotOutputFormats == default ( List<DotOutputFormat> ) )
@@ -105,7 +111,7 @@ namespace GCC_Optimizer
 			if ( !VerifyFile ( ) )
 				return;
 
-			originalSource = File.ReadAllLines ( fileName ).ToList ( );
+			originalSource = File.ReadAllLines ( this.fileName ).ToList ( );
 
 			string prog = Flatten ( );
 
@@ -115,7 +121,7 @@ namespace GCC_Optimizer
 
 			// Replace with original
 			{
-				var fileStream = File.Open ( fileName, FileMode.Truncate );
+				var fileStream = File.Open ( this.fileName, FileMode.Truncate );
 				var byteArray = Encoding.ASCII.GetBytes ( prog );
 				fileStream.Write ( byteArray, 0, byteArray.Length );
 				fileStream.Close ( );
@@ -146,11 +152,11 @@ namespace GCC_Optimizer
 		private string Flatten ( )
 		{
 			var prog = File.ReadAllText ( fileName );
-			string pattern = @".* main\s*\(.*\).*";
+			string pattern = @"(.* )?main\s*\(.*\).*";
 			var match = Regex.Match ( prog, pattern );
 			if ( !match.Value.Contains ( "flatten" ) )
 			{
-				var modified = Regex.Replace ( prog, @"( main\(.*\))", " __attribute__((flatten))$1" );
+				var modified = Regex.Replace ( prog, @"(main\(.*\))", " __attribute__((flatten))$1" );
 				var fileStream = File.Open ( fileName, FileMode.Truncate );
 				var byteArray = Encoding.ASCII.GetBytes ( modified );
 				fileStream.Write ( byteArray, 0, byteArray.Length );
