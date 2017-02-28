@@ -411,7 +411,7 @@ namespace FlowGraph
 					vars.Add ( m.Value );
 			}
 		}
-		
+
 		/// <summary>
 		/// Compare given <paramref name="stmt"/> to <see cref="myPattern"/> using <see cref="Regex"/>.
 		/// </summary>
@@ -747,7 +747,7 @@ namespace FlowGraph
 			retval = match.Groups["retval"].Value;
 			vars.AddRange ( new[] { retval }.Where ( x => isValidIdentifier ( x ) ) );
 		}
-		
+
 		/// <summary>
 		/// Compare given <paramref name="stmt"/> to <see cref="myPattern"/> using <see cref="Regex"/>.
 		/// </summary>

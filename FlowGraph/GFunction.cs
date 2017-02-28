@@ -291,7 +291,7 @@ namespace FlowGraph
 				}
 			}
 		}
-		
+
 		public decimal Compare ( GFunction gFunc )
 		{
 			preprocess ( gFunc );
