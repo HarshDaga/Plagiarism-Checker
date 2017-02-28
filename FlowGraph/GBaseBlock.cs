@@ -6,6 +6,7 @@ using System.Linq;
 
 namespace FlowGraph
 {
+	using System.Text.RegularExpressions;
 	using Block = List<string>;
 
 	/// <summary>
@@ -95,14 +96,10 @@ namespace FlowGraph
 		public string name { get; set; }
 		public string type { get; set; }
 
-		public DefineUseChain ducAssignments { get; set; }
-		public DefineUseChain ducReferences { get; set; }
+		public DefineUseChain ducAssignments { get; set; } = new DefineUseChain ( );
+		public DefineUseChain ducReferences { get; set; } = new DefineUseChain ( );
 
-		public GVar ( )
-		{
-			ducAssignments = new DefineUseChain ( );
-			ducReferences = new DefineUseChain ( );
-		}
+		public GVar ( ) { }
 
 		public bool isSubsetOf ( GVar v )
 		{
@@ -177,6 +174,33 @@ namespace FlowGraph
 		public override string ToString ( )
 		{
 			return $"{type} {name}";
+		}
+	}
+
+	public class GArrayDereference : GVar
+	{
+		public string offset { get; set; }
+		public GArrayDereference ( string str )
+		{
+			string pattern = @"MEM\[base: (?<name>[\w\.]+), offset: (?<offset>\w+)]";
+			var match = Regex.Match ( str, pattern );
+			name = match.Groups["name"].Value;
+			offset = match.Groups["offset"].Value;
+		}
+
+		public static bool matches ( string str )
+		{
+			return Regex.IsMatch ( str, @"^MEM\[base: (?<name>[\w\.]+), offset: (?<offset>\w+)]$" );
+		}
+
+		public override int GetHashCode ( )
+		{
+			return name.GetHashCode ( );
+		}
+
+		public override string ToString ( )
+		{
+			return $"MEM[base: {name}, offset: {offset}]";
 		}
 	}
 
