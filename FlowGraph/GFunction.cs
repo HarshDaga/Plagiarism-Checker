@@ -177,6 +177,16 @@ namespace FlowGraph
 						usedToDeclMap[used] = v;
 					}
 				}
+				if ( !usedToDeclMap.ContainsKey ( used ) )
+				{
+					var v = new GVar ( )
+					{
+						name = used,
+						type = "void *"
+					};
+					gVarsDecl.Add ( v );
+					usedToDeclMap[used] = v;
+				}
 			}
 		}
 

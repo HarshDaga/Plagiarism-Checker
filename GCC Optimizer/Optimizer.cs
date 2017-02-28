@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -276,4 +276,5 @@ namespace GCC_Optimizer
 		}
 
 	}
+	
 }

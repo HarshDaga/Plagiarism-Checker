@@ -617,9 +617,11 @@ namespace FlowGraph
 			var match = Regex.Match ( text, myPattern );
 			funcname = match.Groups["funcname"].Value;
 			string strArgs = match.Groups["args"].Value;
-			var matches = Regex.Matches ( strArgs, @"((\"".*\"")|([\w\.])(,\s*(\"".*\"")|([\w\.]))*)" );
+			var matches = Regex.Matches ( strArgs, @"^(\&\"".*\""\[\d*\])|((\"""".*\"""")|([\w\.]*)(,\s*(\"""".*\"""")|([\w\.]))*)$" );
 			foreach ( Match m in matches )
 			{
+				if ( string.IsNullOrWhiteSpace ( m.Value ) )
+					continue;
 				args.Add ( m.Value );
 				if ( isValidIdentifier ( m.Value ) )
 					vars.Add ( m.Value );
@@ -673,7 +675,7 @@ namespace FlowGraph
 	/// </summary>
 	public class GCastStmt : GimpleStmt
 	{
-		private static string myPattern = @"(?<assignee>[\w\.]*) = \((?<cast>.*)\)\s*(?<v>[\w\.]*);";
+		private static string myPattern = @"(?<assignee>[\w\.]*) = \((?<cast>.*)\)\s*\&?(?<v>[\w\.]*);";
 
 		public string assignee { get; private set; }
 		public string cast { get; private set; }
@@ -690,8 +692,7 @@ namespace FlowGraph
 			v = match.Groups["v"].Value;
 			vars.AddRange ( new[] { assignee, v }.Where ( x => isValidIdentifier ( x ) ) );
 		}
-
-
+		
 		/// <summary>
 		/// Compare given <paramref name="stmt"/> to <see cref="myPattern"/> using <see cref="Regex"/>.
 		/// </summary>
