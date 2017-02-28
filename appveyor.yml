@@ -1,0 +1,14 @@
+version: 1.0.{build}
+image: Visual Studio 2015
+configuration: Release
+platform: Any CPU
+shallow_clone: true
+environment:
+  matrix:
+  - solution_name: GCC Optimizer/GCC Optimizer.csproj
+  - solution_name: FlowGraph/FlowGraph.csproj
+build:
+  project: '%solution_name%'
+  publish_nuget: true
+  include_nuget_references: true
+  verbosity: minimal
