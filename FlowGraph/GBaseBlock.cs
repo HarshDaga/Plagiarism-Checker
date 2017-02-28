@@ -180,6 +180,7 @@ namespace FlowGraph
 	public class GArrayDereference : GVar
 	{
 		public string offset { get; set; }
+
 		public GArrayDereference ( string str )
 		{
 			string pattern = @"MEM\[base: (?<name>[\w\.]+), offset: (?<offset>\w+)]";

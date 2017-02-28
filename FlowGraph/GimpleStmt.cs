@@ -692,7 +692,7 @@ namespace FlowGraph
 			v = match.Groups["v"].Value;
 			vars.AddRange ( new[] { assignee, v }.Where ( x => isValidIdentifier ( x ) ) );
 		}
-		
+
 		/// <summary>
 		/// Compare given <paramref name="stmt"/> to <see cref="myPattern"/> using <see cref="Regex"/>.
 		/// </summary>
