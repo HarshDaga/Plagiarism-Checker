@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -82,13 +82,13 @@ namespace GCC_Optimizer
 		public bool suppressOutput { get; set; } = true;
 
 		public Optimizer (
-			string fileName,
-			string batchFile = "____temp.bat",
-			string gccFlags = "-O3 -fdump-tree-optimized-graph",
-			List<DotOutputFormat> dotOutputFormats = default ( List<DotOutputFormat> ),
-			List<string> suffixes = default ( List<string> ),
-			bool suppressOutput = true
-			)
+						string fileName,
+						string batchFile = "____temp.bat",
+						string gccFlags = "-O3 -fdump-tree-optimized-graph",
+						List<DotOutputFormat> dotOutputFormats = default ( List<DotOutputFormat> ),
+						List<string> suffixes = default ( List<string> ),
+						bool suppressOutput = true
+						)
 		{
 			if ( fileName.Contains ( "\\" ) )
 			{
@@ -276,4 +276,5 @@ namespace GCC_Optimizer
 		}
 
 	}
+
 }
