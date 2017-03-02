@@ -188,6 +188,9 @@ namespace FlowGraph
 					usedToDeclMap[used] = v;
 				}
 			}
+
+			foreach ( var v in gVarsDecl )
+				usedToDeclMap[v.name] = v;
 		}
 
 		private void buildDUC ( )
@@ -294,6 +297,7 @@ namespace FlowGraph
 							string lvar = lhsStmt.vars[i];
 							string rvar = rhsStmt.vars[i];
 							if ( gFunc.usedToDeclMap.ContainsKey ( rvar ) &&
+								varMap.ContainsKey ( usedToDeclMap[lvar] ) &&
 								varMap[usedToDeclMap[lvar]].Contains ( gFunc.usedToDeclMap[rvar] ) )
 								rhsStmt.Rename ( rvar, lvar );
 						}
