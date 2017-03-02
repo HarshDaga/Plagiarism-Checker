@@ -80,6 +80,7 @@ namespace GCC_Optimizer
 		public string stdout { get; private set; } = "";
 		public string stderr { get; private set; } = "";
 		public bool suppressOutput { get; set; } = true;
+		public bool rebuild { get; set; } = false;
 
 		public Optimizer (
 						string fileName,
@@ -87,12 +88,13 @@ namespace GCC_Optimizer
 						string gccFlags = "-O3 -fdump-tree-optimized-graph",
 						List<DotOutputFormat> dotOutputFormats = default ( List<DotOutputFormat> ),
 						List<string> suffixes = default ( List<string> ),
-						bool suppressOutput = true
+						bool suppressOutput = true,
+						bool rebuild = false
 						)
 		{
 			if ( fileName.Contains ( "\\" ) )
 			{
-				this.fileName = fileName.Substring ( fileName.LastIndexOf ( '\\' ) + 1 );
+				this.fileName = Path.GetFileName ( fileName );
 				File.Copy ( fileName, this.fileName, true );
 			}
 			else
@@ -103,6 +105,7 @@ namespace GCC_Optimizer
 				dotOutputFormats = new List<DotOutputFormat> { DotOutputFormat.png, DotOutputFormat.plain };
 			this.dotOutputFormats = dotOutputFormats;
 			this.suppressOutput = suppressOutput;
+			this.rebuild = rebuild;
 			if ( suffixes == default ( List<string> ) )
 				suffixes = new List<string> { ".190t.optimized", ".191t.optimized" };
 			this.suffixes = suffixes;
@@ -171,6 +174,23 @@ namespace GCC_Optimizer
 		/// <returns></returns>
 		private bool CompileAndOptimize ( )
 		{
+			var prefix = Path.GetFileNameWithoutExtension ( fileName );
+			var dir = new DirectoryInfo ( prefix );
+			if ( dir.Exists && !rebuild )
+			{
+				var files = dir.GetFiles ( );
+				var cfile = files.FirstOrDefault ( f => f.Name == fileName );
+				if ( cfile != null )
+				{
+					var gimple = files.FirstOrDefault ( f => f.Name == $"{prefix}.GIMPLE" );
+					if ( gimple != null )
+					{
+						originalGIMPLE = File.ReadAllLines ( gimple.FullName ).ToList ( );
+						return true;
+					}
+				}
+			}
+
 			string cmd = $"gcc {gccFlags} \"" + fileName + "\"\n";
 			var results = ExecCmd ( cmd );
 			stdout += results.Item1;
@@ -187,8 +207,7 @@ namespace GCC_Optimizer
 				if ( File.Exists ( fileName + suffix ) )
 					oldOptimizedGIMPLE = fileName + suffix;
 			oldOptimizedDot = oldOptimizedGIMPLE + ".dot";
-			var prefix = fileName.Substring ( 0, fileName.Length - 2 );
-			var dir = new DirectoryInfo ( prefix );
+
 			if ( dir.Exists )
 				foreach ( var f in dir.GetFiles ( ) )
 					f.Delete ( );
@@ -196,16 +215,19 @@ namespace GCC_Optimizer
 				dir.Create ( );
 			while ( !dir.Exists )
 				dir.Refresh ( );
+
 			var file = new FileInfo ( oldOptimizedGIMPLE );
 			while ( !file.Exists )
 				file.Refresh ( );
 			var optimizedGIMPLE = prefix + ".GIMPLE";
 			var optimizedDot = prefix + ".opt.dot";
 			//Thread.Sleep ( 1000 );
+
 			File.Move ( oldOptimizedGIMPLE, $"{dir.Name}\\{optimizedGIMPLE}" );
 			File.Move ( oldOptimizedDot, $"{dir.Name}\\{optimizedDot}" );
 			File.Copy ( fileName, $"{dir.Name}\\{fileName}" );
 			originalGIMPLE = File.ReadAllLines ( $"{dir.Name}\\{optimizedGIMPLE}" ).ToList ( );
+
 			foreach ( var format in dotOutputFormats )
 			{
 				cmd = $"dot -T{format} -O \"{prefix}\\{optimizedDot}\"";
