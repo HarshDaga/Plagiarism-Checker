@@ -58,6 +58,7 @@
     <Compile Include="GBaseBlock.cs" />
     <Compile Include="GFunction.cs" />
     <Compile Include="GimpleStmt.cs" />
+    <Compile Include="GVar.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
