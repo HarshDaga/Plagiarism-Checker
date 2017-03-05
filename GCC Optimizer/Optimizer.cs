@@ -85,11 +85,11 @@ namespace GCC_Optimizer
 		public Optimizer (
 						string fileName,
 						string batchFile = "____temp.bat",
-						string gccFlags = "-O3 -fdump-tree-optimized-graph",
+						string gccFlags = "-Ofast -fexpensive-optimizations -frerun-loop-opt -funroll-all-loops -fgcse -fmerge-all-constants -fdump-tree-optimized-graph",
 						List<DotOutputFormat> dotOutputFormats = default ( List<DotOutputFormat> ),
 						List<string> suffixes = default ( List<string> ),
 						bool suppressOutput = true,
-						bool rebuild = false
+						bool rebuild = true
 						)
 		{
 			if ( fileName.Contains ( "\\" ) )
