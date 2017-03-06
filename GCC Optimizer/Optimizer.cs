@@ -70,7 +70,7 @@ namespace GCC_Optimizer
 		public string fileName { get; private set; }
 		public List<string> dotOutputs { get; private set; }
 		private string batchFile { get; set; }
-		public string gccFlags { get; set; }
+		public List<string> gccFlags { get; set; }
 		public List<string> suffixes { get; set; }
 		public List<DotOutputFormat> dotOutputFormats { get; set; }
 		public List<string> originalSource { get; private set; } = null;
@@ -85,7 +85,7 @@ namespace GCC_Optimizer
 		public Optimizer (
 						string fileName,
 						string batchFile = "____temp.bat",
-						string gccFlags = "-Ofast -fexpensive-optimizations -frerun-loop-opt -funroll-all-loops -fgcse -fmerge-all-constants -fdump-tree-optimized-graph",
+						List<string> gccFlags = default ( List<string> ),
 						List<DotOutputFormat> dotOutputFormats = default ( List<DotOutputFormat> ),
 						List<string> suffixes = default ( List<string> ),
 						bool suppressOutput = true,
@@ -100,15 +100,28 @@ namespace GCC_Optimizer
 			else
 				this.fileName = fileName;
 			this.batchFile = batchFile;
-			this.gccFlags = gccFlags;
+			if ( gccFlags == default ( List<string> ) )
+			{
+				gccFlags = new List<string>
+				{
+					"-Ofast",
+					"-fdump-tree-optimized-graph",
+					"-fexpensive-optimizations",
+					"-frerun-loop-opt",
+					"-funroll-all-loops",
+					"-fgcse",
+					"-fmerge-all-constants"
+				};
+			}
+			this.gccFlags = gccFlags.ToList ( );
 			if ( dotOutputFormats == default ( List<DotOutputFormat> ) )
 				dotOutputFormats = new List<DotOutputFormat> { DotOutputFormat.png, DotOutputFormat.plain };
-			this.dotOutputFormats = dotOutputFormats;
+			this.dotOutputFormats = dotOutputFormats.ToList ( );
 			this.suppressOutput = suppressOutput;
 			this.rebuild = rebuild;
 			if ( suffixes == default ( List<string> ) )
 				suffixes = new List<string> { ".190t.optimized", ".191t.optimized" };
-			this.suffixes = suffixes;
+			this.suffixes = suffixes.ToList ( );
 			this.dotOutputs = new List<string> ( );
 
 			if ( !VerifyFile ( ) )
@@ -191,7 +204,7 @@ namespace GCC_Optimizer
 				}
 			}
 
-			string cmd = $"gcc {gccFlags} \"" + fileName + "\"\n";
+			string cmd = $"gcc {string.Join ( " ", gccFlags )} \"" + fileName + "\"\n";
 			var results = ExecCmd ( cmd );
 			stdout += results.Item1;
 			stderr += results.Item2;
