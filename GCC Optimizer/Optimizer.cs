@@ -12,7 +12,7 @@ using System.Text.RegularExpressions;
 namespace GCC_Optimizer
 {
 	/// <summary>
-	/// Result of <see cref="Optimizer.Optimizer(string, string, string, List{DotOutputFormat}, List{string}, bool)"/>
+	/// Result of <see cref="Optimizer.Optimizer(string, string, List{string}, List{DotOutputFormat}, List{string}, bool, bool)"/>
 	/// </summary>
 	public enum OptimizeResult
 	{
@@ -69,7 +69,7 @@ namespace GCC_Optimizer
 	{
 		public string fileName { get; private set; }
 		public List<string> dotOutputs { get; private set; }
-		private string batchFile { get; set; }
+		public string batchFile { get; set; }
 		public List<string> gccFlags { get; set; }
 		public List<string> suffixes { get; set; }
 		public List<DotOutputFormat> dotOutputFormats { get; set; }
@@ -100,6 +100,7 @@ namespace GCC_Optimizer
 			else
 				this.fileName = fileName;
 			this.batchFile = batchFile;
+
 			if ( gccFlags == default ( List<string> ) )
 			{
 				gccFlags = new List<string>
@@ -114,14 +115,18 @@ namespace GCC_Optimizer
 				};
 			}
 			this.gccFlags = gccFlags.ToList ( );
+
 			if ( dotOutputFormats == default ( List<DotOutputFormat> ) )
 				dotOutputFormats = new List<DotOutputFormat> { DotOutputFormat.png, DotOutputFormat.plain };
 			this.dotOutputFormats = dotOutputFormats.ToList ( );
+
 			this.suppressOutput = suppressOutput;
 			this.rebuild = rebuild;
+
 			if ( suffixes == default ( List<string> ) )
 				suffixes = new List<string> { ".190t.optimized", ".191t.optimized" };
 			this.suffixes = suffixes.ToList ( );
+
 			this.dotOutputs = new List<string> ( );
 
 			if ( !VerifyFile ( ) )

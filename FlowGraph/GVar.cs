@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -95,7 +94,9 @@ public class GVar
 	public DefineUseChain ducAssignments { get; set; } = new DefineUseChain ( );
 	public DefineUseChain ducReferences { get; set; } = new DefineUseChain ( );
 
-	public GVar ( ) { }
+	public GVar ( )
+	{
+	}
 
 	public bool isSubsetOf ( GVar v )
 	{
@@ -253,4 +254,3 @@ public class GArrayDereference : GVar
 //        gVar = null;
 //    }
 //}
-
