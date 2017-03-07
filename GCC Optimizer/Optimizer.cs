@@ -12,7 +12,7 @@ using System.Text.RegularExpressions;
 namespace GCC_Optimizer
 {
 	/// <summary>
-	/// Result of <see cref="Optimizer.Optimizer(string, string, List{string}, List{DotOutputFormat}, List{string}, bool, bool)"/>
+	/// Result of <see cref="Optimizer.Optimizer(string)"/>
 	/// </summary>
 	public enum OptimizeResult
 	{
@@ -80,17 +80,9 @@ namespace GCC_Optimizer
 		public string stdout { get; private set; } = "";
 		public string stderr { get; private set; } = "";
 		public bool suppressOutput { get; set; } = true;
-		public bool rebuild { get; set; } = false;
+		public bool rebuild { get; set; } = true;
 
-		public Optimizer (
-						string fileName,
-						string batchFile = "____temp.bat",
-						List<string> gccFlags = default ( List<string> ),
-						List<DotOutputFormat> dotOutputFormats = default ( List<DotOutputFormat> ),
-						List<string> suffixes = default ( List<string> ),
-						bool suppressOutput = true,
-						bool rebuild = true
-						)
+		public Optimizer ( string fileName )
 		{
 			if ( fileName.Contains ( "\\" ) )
 			{
@@ -99,7 +91,9 @@ namespace GCC_Optimizer
 			}
 			else
 				this.fileName = fileName;
-			this.batchFile = batchFile;
+
+			if ( batchFile == null )
+				batchFile = "____temp.bat";
 
 			if ( gccFlags == default ( List<string> ) )
 			{
@@ -114,20 +108,14 @@ namespace GCC_Optimizer
 					"-fmerge-all-constants"
 				};
 			}
-			this.gccFlags = gccFlags.ToList ( );
 
 			if ( dotOutputFormats == default ( List<DotOutputFormat> ) )
 				dotOutputFormats = new List<DotOutputFormat> { DotOutputFormat.png, DotOutputFormat.plain };
-			this.dotOutputFormats = dotOutputFormats.ToList ( );
-
-			this.suppressOutput = suppressOutput;
-			this.rebuild = rebuild;
-
+			
 			if ( suffixes == default ( List<string> ) )
 				suffixes = new List<string> { ".190t.optimized", ".191t.optimized" };
-			this.suffixes = suffixes.ToList ( );
 
-			this.dotOutputs = new List<string> ( );
+			dotOutputs = new List<string> ( );
 
 			if ( !VerifyFile ( ) )
 				return;
@@ -136,7 +124,8 @@ namespace GCC_Optimizer
 
 			string prog = Flatten ( );
 
-			CompileAndOptimize ( );
+			if ( !CompileAndOptimize ( ) )
+				return;
 
 			GIMPLE = CleanGIMPLE ( originalGIMPLE );
 
@@ -186,15 +175,11 @@ namespace GCC_Optimizer
 			return prog;
 		}
 
-		/// <summary>
-		/// Compile, Optimize and Convert the output given the source filename.
-		/// </summary>
-		/// <returns></returns>
-		private bool CompileAndOptimize ( )
+		private bool GimpleExists ( )
 		{
 			var prefix = Path.GetFileNameWithoutExtension ( fileName );
 			var dir = new DirectoryInfo ( prefix );
-			if ( dir.Exists && !rebuild )
+			if ( dir.Exists )
 			{
 				var files = dir.GetFiles ( );
 				var cfile = files.FirstOrDefault ( f => f.Name == fileName );
@@ -209,16 +194,36 @@ namespace GCC_Optimizer
 				}
 			}
 
-			string cmd = $"gcc {string.Join ( " ", gccFlags )} \"" + fileName + "\"\n";
-			var results = ExecCmd ( cmd );
-			stdout += results.Item1;
-			stderr += results.Item2;
-			if ( results.Item2.Length > 0 )
+			return false;
+		}
+
+		/// <summary>
+		/// Compile, Optimize and Convert the output given the source filename.
+		/// </summary>
+		/// <returns>true on successful compilation.</returns>
+		private bool CompileAndOptimize ( )
+		{
+			if ( !rebuild && GimpleExists ( ) )
+				return true;
+
+			var prefix = Path.GetFileNameWithoutExtension ( fileName );
+			var dir = new DirectoryInfo ( prefix );
+
+			string cmd;
+
+			// Compile the file
 			{
-				lastError = OptimizeResult.CompileError;                             // Compilation Error
-				return false;
+				cmd = $"gcc {string.Join ( " ", gccFlags )} \"" + fileName + "\"\n";
+				var results = ExecCmd ( cmd );
+				stdout += results.Item1;
+				stderr += results.Item2;
+				if ( results.Item2.Length > 0 )
+				{
+					lastError = OptimizeResult.CompileError;                             // Compilation Error
+					return false;
+				}
+				File.Delete ( "a.exe" );
 			}
-			File.Delete ( "a.exe" );
 
 			string oldOptimizedGIMPLE = null, oldOptimizedDot = null;
 			foreach ( var suffix in suffixes )
@@ -241,15 +246,19 @@ namespace GCC_Optimizer
 			var optimizedDot = prefix + ".opt.dot";
 			//Thread.Sleep ( 1000 );
 
-			File.Move ( oldOptimizedGIMPLE, $"{dir.Name}\\{optimizedGIMPLE}" );
-			File.Move ( oldOptimizedDot, $"{dir.Name}\\{optimizedDot}" );
-			File.Copy ( fileName, $"{dir.Name}\\{fileName}" );
+			// Rearrange files
+			{
+				File.Move ( oldOptimizedGIMPLE, $"{dir.Name}\\{optimizedGIMPLE}" );
+				File.Move ( oldOptimizedDot, $"{dir.Name}\\{optimizedDot}" );
+				File.Copy ( fileName, $"{dir.Name}\\{fileName}" );
+			}
+
 			originalGIMPLE = File.ReadAllLines ( $"{dir.Name}\\{optimizedGIMPLE}" ).ToList ( );
 
 			foreach ( var format in dotOutputFormats )
 			{
 				cmd = $"dot -T{format} -O \"{prefix}\\{optimizedDot}\"";
-				results = ExecCmd ( cmd );
+				var results = ExecCmd ( cmd );
 				stdout += results.Item1;
 				stderr += results.Item2;
 				dotOutputs.Add ( $"{optimizedDot}.{format}" );
