@@ -65,6 +65,7 @@ namespace GCC_Optimizer
 	/// <summary>
 	/// Handles all GCC and dot related activities.
 	/// </summary>
+	[DebuggerDisplay ( "{fileName}" )]
 	public class Optimizer
 	{
 		public string fileName { get; private set; }
@@ -84,6 +85,12 @@ namespace GCC_Optimizer
 
 		public Optimizer ( string fileName )
 		{
+			if ( !File.Exists ( fileName ) )
+			{
+				lastError = OptimizeResult.FileNotFound;
+				throw new FileNotFoundException ( $"{fileName} couldn't be found." );
+			}
+
 			if ( fileName.Contains ( "\\" ) )
 			{
 				this.fileName = Path.GetFileName ( fileName );
@@ -116,16 +123,19 @@ namespace GCC_Optimizer
 				suffixes = new List<string> { ".190t.optimized", ".191t.optimized" };
 
 			dotOutputs = new List<string> ( );
+		}
 
+		public bool Run ( )
+		{
 			if ( !VerifyFile ( ) )
-				return;
+				return false;
 
 			originalSource = File.ReadAllLines ( this.fileName ).ToList ( );
 
 			string prog = Flatten ( );
 
 			if ( !CompileAndOptimize ( ) )
-				return;
+				return false;
 
 			GIMPLE = CleanGIMPLE ( originalGIMPLE );
 
@@ -136,6 +146,8 @@ namespace GCC_Optimizer
 				fileStream.Write ( byteArray, 0, byteArray.Length );
 				fileStream.Close ( );
 			}
+
+			return true;
 		}
 
 		private bool VerifyFile ( )

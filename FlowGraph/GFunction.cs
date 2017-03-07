@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text.RegularExpressions;
 
@@ -10,12 +11,18 @@ namespace FlowGraph
 	/// <summary>
 	/// Represents a function in the GIMPLE file.
 	/// </summary>
+	[DebuggerDisplay ( "{name} in {fileName} : Threshold = {threshold}" )]
 	public class GFunction
 	{
 		/// <summary>
 		/// All lines in the GIMPLE file.
 		/// </summary>
 		public List<string> gimple { get; private set; }
+
+		/// <summary>
+		/// Name of the file the function belongs to.
+		/// </summary>
+		public string fileName { get; private set; }
 
 		/// <summary>
 		/// Name of the function.
@@ -88,9 +95,11 @@ namespace FlowGraph
 		/// Build all the <see cref="GBaseBlock"/>s and other members using the GIMPLE input file.
 		/// </summary>
 		/// <param name="gimple"><see cref="List{T}"/> of <see cref="string"/> from the GIMPLE source.</param>
-		public GFunction ( List<string> gimple )
+		/// <param name="fileName">Name of the file this function belongs to.</param>
+		public GFunction ( List<string> gimple, string fileName = "" )
 		{
 			initialize ( gimple );
+			this.fileName = fileName;
 		}
 
 		private void initialize ( List<string> gimple )

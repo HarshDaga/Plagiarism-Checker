@@ -11,9 +11,10 @@ namespace ProgramTests
 		public static GFunction getGFunction ( string fileName )
 		{
 			var optimizer = new Optimizer ( fileName );
+			optimizer.Run ( );
 			var gimple = optimizer.GIMPLE;
 
-			var gFunction = new GFunction ( gimple );
+			var gFunction = new GFunction ( gimple, fileName );
 
 			return gFunction;
 		}
