@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.IO;
 
 #pragma warning disable CS1591
 
@@ -326,9 +327,26 @@ namespace FlowGraph
 					++count;
 			decimal result = 200m * count / ( lhsStmts.Count + rhsStmts.Count );
 
-			gFunc.initialize ( gFunc.gimple );
+			gFunc.reset ( );
 
 			return result;
+		}
+
+		public void dumpGimple ( string path )
+		{
+			using ( var stream = new StreamWriter ( path ) )
+			{
+				foreach ( var block in blocks )
+				{
+					block.gStatements.ForEach ( s => stream.WriteLine ( s ) );
+					stream.WriteLine ( );
+				}
+			}
+		}
+
+		public void reset ( )
+		{
+			initialize ( gimple );
 		}
 
 		/// <summary>

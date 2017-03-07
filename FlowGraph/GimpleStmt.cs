@@ -321,11 +321,51 @@ namespace FlowGraph
 	/// </summary>
 	public class GAssignStmt : GimpleStmt
 	{
-		private static string myPattern = @"(?<assignee>[\w\.]*) = (?<var1>[\w\.]*)( (?<op>\S*) (?<var2>[\w\.]*))?;";
+		private static string myPattern = @"(?<assignee>[\w\.\[\]\,\ \:]*) = (?<var1>[\w\.\[\]\,\ \:]*)( (?<op>\S*) (?<var2>[\w\.]*))?;";
 
-		public string assignee { get; private set; }
-		public string var1 { get; private set; }
-		public string var2 { get; private set; }
+		private string _assignee;
+		private string _var1;
+		private string _var2;
+
+		public string assignee
+		{
+			get
+			{
+				if ( GArrayDereference.matches ( _assignee ) )
+					return ( new GArrayDereference ( _assignee ).name );
+				return _assignee;
+			}
+			private set
+			{
+				_assignee = value;
+			}
+		}
+		public string var1
+		{
+			get
+			{
+				if ( GArrayDereference.matches ( _var1 ) )
+					return ( new GArrayDereference ( _var1 ).name );
+				return _var1;
+			}
+			private set
+			{
+				_var1 = value;
+			}
+		}
+		public string var2
+		{
+			get
+			{
+				if ( GArrayDereference.matches ( _var2 ) )
+					return ( new GArrayDereference ( _var2 ).name );
+				return _var2;
+			}
+			private set
+			{
+				_var2 = value;
+			}
+		}
 		public string op { get; private set; }
 
 		public GAssignStmt ( string text )
@@ -354,18 +394,45 @@ namespace FlowGraph
 
 		public override string ToString ( )
 		{
-			string second = var2 == "" ? "" : $" {op} {var2}";
-			return $"{assignee} = {var1}{second};";
+			string second = var2 == "" ? "" : $" {op} {_var2}";
+			return $"{_assignee} = {_var1}{second};";
 		}
 
 		public override List<string> Rename ( string oldName, string newName )
 		{
 			if ( assignee == oldName )
-				assignee = newName;
+			{
+				if ( GArrayDereference.matches ( _assignee ) )
+				{
+					var temp = new GArrayDereference ( _assignee );
+					temp.name = newName;
+					_assignee = temp.ToString ( );
+				}
+				else
+					_assignee = newName;
+			}
 			if ( var1 == oldName )
-				var1 = newName;
+			{
+				if ( GArrayDereference.matches ( _var1 ) )
+				{
+					var temp = new GArrayDereference ( _var1 );
+					temp.name = newName;
+					_var1 = temp.ToString ( );
+				}
+				else
+					_var1 = newName;
+			}
 			if ( object.Equals ( var2, oldName ) )
-				var2 = newName;
+			{
+				if ( GArrayDereference.matches ( _var2 ) )
+				{
+					var temp = new GArrayDereference ( _var2 );
+					temp.name = newName;
+					_var2 = temp.ToString ( );
+				}
+				else
+					_var2 = newName;
+			}
 			return base.Rename ( oldName, newName );
 		}
 
@@ -675,11 +742,38 @@ namespace FlowGraph
 	/// </summary>
 	public class GCastStmt : GimpleStmt
 	{
-		private static string myPattern = @"(?<assignee>[\w\.]*) = \((?<cast>.*)\)\s*\&?(?<v>[\w\.]*);";
+		private static string myPattern = @"(?<assignee>[\w\.\[\]\,\ \:]*) = \((?<cast>.*)\)\s*\&?(?<v>[\w\.\[\]\,\ \:]*);";
 
-		public string assignee { get; private set; }
+		private string _assignee;
+		private string _v;
+
+		public string assignee
+		{
+			get
+			{
+				if ( GArrayDereference.matches ( _assignee ) )
+					return ( new GArrayDereference ( _assignee ).name );
+				return _assignee;
+			}
+			private set
+			{
+				_assignee = value;
+			}
+		}
 		public string cast { get; private set; }
-		public string v { get; private set; }
+		public string v
+		{
+			get
+			{
+				if ( GArrayDereference.matches ( _v ) )
+					return ( new GArrayDereference ( _v ).name );
+				return _v;
+			}
+			private set
+			{
+				_v = value;
+			}
+		}
 
 		public GCastStmt ( string text )
 		{
@@ -705,15 +799,34 @@ namespace FlowGraph
 
 		public override string ToString ( )
 		{
-			return $"{assignee} = ({cast}) {v};";
+			return $"{_assignee} = ({cast}) {_v};";
 		}
 
 		public override List<string> Rename ( string oldName, string newName )
 		{
+
 			if ( assignee == oldName )
-				assignee = newName;
+			{
+				if ( GArrayDereference.matches ( _assignee ) )
+				{
+					var temp = new GArrayDereference ( _assignee );
+					temp.name = newName;
+					_assignee = temp.ToString ( );
+				}
+				else
+					_assignee = newName;
+			}
 			if ( v == oldName )
-				v = newName;
+			{
+				if ( GArrayDereference.matches ( _v ) )
+				{
+					var temp = new GArrayDereference ( _v );
+					temp.name = newName;
+					_v = temp.ToString ( );
+				}
+				else
+					_v = newName;
+			}
 			return base.Rename ( oldName, newName );
 		}
 
