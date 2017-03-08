@@ -12,84 +12,81 @@ namespace FlowGraph
 	/// <summary>
 	/// Represents a function in the GIMPLE file.
 	/// </summary>
-	[DebuggerDisplay ( "{name} in {fileName} : Threshold = {threshold}" )]
+	[DebuggerDisplay ( "{Name} in {FileName} : Threshold = {Threshold}" )]
 	public class GFunction
 	{
 		/// <summary>
 		/// All lines in the GIMPLE file.
 		/// </summary>
-		public List<string> gimple { get; private set; }
+		public List<string> Gimple { get; private set; }
 
 		/// <summary>
 		/// Name of the file the function belongs to.
 		/// </summary>
-		public string fileName { get; private set; }
+		public string FileName { get; private set; }
 
 		/// <summary>
 		/// Name of the function.
 		/// </summary>
-		public string name { get; private set; }
+		public string Name { get; private set; }
 
 		/// <summary>
 		/// Threshold to be used when comparing variables (0 - 1)
 		/// Default: 0.95m
 		/// </summary>
-		public decimal threshold { get; set; } = 0.95m;
+		public decimal Threshold { get; set; } = 0.95m;
 
 		/// <summary>
 		/// funcdef_no of the function.
 		/// </summary>
-		public int funcdef_no { get; private set; }
+		public int Funcdef_no { get; private set; }
 
 		/// <summary>
 		/// decl_uid of the function.
 		/// </summary>
-		public int decl_uid { get; private set; }
+		public int Decl_uid { get; private set; }
 
 		/// <summary>
 		/// symbol_order of the function.
 		/// </summary>
-		public int symbol_order { get; private set; }
+		public int Symbol_order { get; private set; }
 
 		/// <summary>
 		/// Functions formal arguments.
 		/// </summary>
-		public string args { get; private set; }
+		public string Args { get; private set; }
 
 		/// <summary>
 		/// All the <see cref="GBaseBlock"/>s in the function.
 		/// </summary>
-		public List<GBaseBlock> blocks { get; private set; } = new List<GBaseBlock> ( );
+		public List<GBaseBlock> Blocks { get; private set; } = new List<GBaseBlock> ( );
 
 		/// <summary>
 		/// <see cref="Dictionary{TKey, TValue}"/> of <see cref="int"/> mapped to <see cref="GBaseBlock"/> by the number.
 		/// </summary>
-		public Dictionary<int, GBaseBlock> blockMap { get; private set; } = new Dictionary<int, GBaseBlock> ( );
+		public Dictionary<int, GBaseBlock> BlockMap { get; private set; } = new Dictionary<int, GBaseBlock> ( );
 
 		/// <summary>
 		/// <see cref="HashSet{T}"/> of all the <see cref="GVar"/> declared in the function.
 		/// </summary>
-		public HashSet<GVar> gVarsDecl { get; set; } = new HashSet<GVar> ( );
+		public HashSet<GVar> GVarsDecl { get; set; } = new HashSet<GVar> ( );
 
 		/// <summary>
 		/// <see cref="HashSet{T}"/> of all the variable names used in the function as <see cref="string"/>.
 		/// </summary>
-		public HashSet<string> gVarsUsed { get; set; } = new HashSet<string> ( );
+		public HashSet<string> GVarsUsed { get; set; } = new HashSet<string> ( );
 
 		/// <summary>
 		/// <see cref="Dictionary{TKey, TValue}"/> of <see cref="string"/> mapped to <see cref="GVar"/> by the variable name with its GIMPLE suffix.
 		/// </summary>
-		public Dictionary<string, GVar> usedToDeclMap { get; set; } = new Dictionary<string, GVar> ( );
+		public Dictionary<string, GVar> UsedToDeclMap { get; set; } = new Dictionary<string, GVar> ( );
 
 		/// <summary>
 		/// <see cref="Dictionary{TKey, TValue}"/> of <see cref="string"/> mapped to <see cref="GVar"/> by the variable name with its GIMPLE suffix.
 		/// </summary>
-		public List<GimpleStmt> gStatements
+		public List<GimpleStmt> GStatements
 		{
-			get
-			{
-				return blocks.SelectMany ( b => b.gStatements ).ToList ( );
-			}
+			get => Blocks.SelectMany ( b => b.GStatements ).ToList ( );
 		}
 
 		/// <summary>
@@ -99,13 +96,13 @@ namespace FlowGraph
 		/// <param name="fileName">Name of the file this function belongs to.</param>
 		public GFunction ( List<string> gimple, string fileName = "" )
 		{
-			initialize ( gimple );
-			this.fileName = fileName;
+			Initialize ( gimple );
+			this.FileName = fileName;
 		}
 
-		private void initialize ( List<string> gimple )
+		private void Initialize ( List<string> gimple )
 		{
-			this.gimple = gimple;
+			this.Gimple = gimple;
 			string pattern = @";; Function (?<name>\S*) \((\S*, funcdef_no=(?<funcdef_no>[0-9]*), decl_uid=(?<decl_uid>[0-9]*), cgraph_uid=[0-9]*, symbol_order=(?<symbol_order>[0-9]*))\).*";
 			bool insideFunc = false, insideBody = false;
 			List<string> body = new List<string> ( );
@@ -115,10 +112,10 @@ namespace FlowGraph
 				{
 					insideFunc = true;
 					var match = Regex.Match ( line, pattern );
-					name = match.Groups["name"].Value;
-					funcdef_no = Convert.ToInt32 ( match.Groups["funcdef_no"].Value );
-					decl_uid = Convert.ToInt32 ( match.Groups["decl_uid"].Value );
-					symbol_order = Convert.ToInt32 ( match.Groups["symbol_order"].Value );
+					Name = match.Groups["name"].Value;
+					Funcdef_no = Convert.ToInt32 ( match.Groups["funcdef_no"].Value );
+					Decl_uid = Convert.ToInt32 ( match.Groups["decl_uid"].Value );
+					Symbol_order = Convert.ToInt32 ( match.Groups["symbol_order"].Value );
 				}
 				if ( !insideFunc )
 					continue;
@@ -130,101 +127,101 @@ namespace FlowGraph
 				body.Add ( line );
 			}
 
-			blocks = GBaseBlock.getBaseBlocks ( body );
+			Blocks = GBaseBlock.GetBaseBlocks ( body );
 
-			getVarsDecl ( body );
+			GetVarsDecl ( body );
 
-			getVarsUsed ( );
+			GetVarsUsed ( );
 
-			buildUsedToDeclMap ( );
+			BuildUsedToDeclMap ( );
 
-			removeCasts ( );
+			RemoveCasts ( );
 
-			getVarsUsed ( );
+			GetVarsUsed ( );
 
-			buildUsedToDeclMap ( );
+			BuildUsedToDeclMap ( );
 
-			buildDUC ( );
+			BuildDUC ( );
 
-			createEdges ( );
+			CreateEdges ( );
 		}
 
-		private void getVarsDecl ( List<string> gimple )
+		private void GetVarsDecl ( List<string> gimple )
 		{
-			gVarsDecl.Clear ( );
+			GVarsDecl.Clear ( );
 			foreach ( var line in gimple )
 			{
-				if ( line == "" || GBBStmt.matches ( line ) )
+				if ( line == "" || GBBStmt.Matches ( line ) )
 					break;
 				string declPattern = @"\s*(?<type>.*) (?<name>\S*);";
 				var match = Regex.Match ( line, declPattern );
 				var gVar = new GVar
 				{
-					name = match.Groups["name"].Value,
-					type = match.Groups["type"].Value
+					Name = match.Groups["name"].Value,
+					Type = match.Groups["type"].Value
 				};
-				gVarsDecl.Add ( gVar );
+				GVarsDecl.Add ( gVar );
 			}
 
 		}
 
-		private void getVarsUsed ( )
+		private void GetVarsUsed ( )
 		{
-			gVarsUsed.Clear ( );
-			foreach ( var block in blocks )
-				gVarsUsed.UnionWith ( block.vars );
+			GVarsUsed.Clear ( );
+			foreach ( var block in Blocks )
+				GVarsUsed.UnionWith ( block.Vars );
 		}
 
-		private void buildUsedToDeclMap ( )
+		private void BuildUsedToDeclMap ( )
 		{
-			usedToDeclMap.Clear ( );
-			foreach ( var used in gVarsUsed )
+			UsedToDeclMap.Clear ( );
+			foreach ( var used in GVarsUsed )
 			{
-				foreach ( var v in gVarsDecl )
+				foreach ( var v in GVarsDecl )
 				{
-					if ( Regex.IsMatch ( used, $"^{v.name}(_[0123456789]+)?$" ) )
+					if ( Regex.IsMatch ( used, $"^{v.Name}(_[0123456789]+)?$" ) )
 					{
-						usedToDeclMap[used] = v;
+						UsedToDeclMap[used] = v;
 					}
 				}
-				if ( !usedToDeclMap.ContainsKey ( used ) )
+				if ( !UsedToDeclMap.ContainsKey ( used ) )
 				{
 					var v = new GVar ( )
 					{
-						name = used,
-						type = "void *"
+						Name = used,
+						Type = "void *"
 					};
-					gVarsDecl.Add ( v );
-					usedToDeclMap[used] = v;
+					GVarsDecl.Add ( v );
+					UsedToDeclMap[used] = v;
 				}
 			}
 
-			foreach ( var v in gVarsDecl )
-				usedToDeclMap[v.name] = v;
+			foreach ( var v in GVarsDecl )
+				UsedToDeclMap[v.Name] = v;
 		}
 
-		private void buildDUC ( )
+		private void BuildDUC ( )
 		{
-			foreach ( var v in gVarsDecl )
+			foreach ( var v in GVarsDecl )
 			{
-				v.ducAssignments.data.Clear ( );
-				v.ducReferences.data.Clear ( );
+				v.DucAssignments.data.Clear ( );
+				v.DucReferences.data.Clear ( );
 			}
-			foreach ( var block in blocks )
+			foreach ( var block in Blocks )
 			{
-				gVarsUsed.UnionWith ( block.vars );
-				foreach ( var stmt in block.gStatements )
+				GVarsUsed.UnionWith ( block.Vars );
+				foreach ( var stmt in block.GStatements )
 				{
 					if ( stmt is GAssignStmt || stmt is GPhiStmt || stmt is GOptimizedStmt )
 					{
-						usedToDeclMap[stmt.vars[0]].ducAssignments.add ( block.number, stmt.linenum );
-						for ( int i = 1; i < stmt.vars.Count; ++i )
-							usedToDeclMap[stmt.vars[i]].ducReferences.add ( block.number, stmt.linenum );
+						UsedToDeclMap[stmt.Vars[0]].DucAssignments.Add ( block.Number, stmt.Linenum );
+						for ( int i = 1; i < stmt.Vars.Count; ++i )
+							UsedToDeclMap[stmt.Vars[i]].DucReferences.Add ( block.Number, stmt.Linenum );
 					}
 					else
 					{
-						foreach ( var v in stmt.vars )
-							usedToDeclMap[v].ducReferences.add ( block.number, stmt.linenum );
+						foreach ( var v in stmt.Vars )
+							UsedToDeclMap[v].DucReferences.Add ( block.Number, stmt.Linenum );
 					}
 				}
 			}
@@ -232,83 +229,83 @@ namespace FlowGraph
 
 		public void Rename ( string oldName, string newName )
 		{
-			blocks.ForEach ( b => b.Rename ( oldName, newName ) );
+			Blocks.ForEach ( b => b.Rename ( oldName, newName ) );
 
-			if ( gVarsDecl.Count ( v => v.name == oldName ) != 0 )
-				gVarsDecl.Where ( v => v.name == oldName ).FirstOrDefault ( ).name =
-					usedToDeclMap.ContainsKey ( newName ) ? usedToDeclMap[newName].name : newName;
-			gVarsDecl = new HashSet<GVar> ( gVarsDecl );
+			if ( GVarsDecl.Count ( v => v.Name == oldName ) != 0 )
+				GVarsDecl.Where ( v => v.Name == oldName ).FirstOrDefault ( ).Name =
+					UsedToDeclMap.ContainsKey ( newName ) ? UsedToDeclMap[newName].Name : newName;
+			GVarsDecl = new HashSet<GVar> ( GVarsDecl );
 
-			if ( gVarsUsed.Remove ( oldName ) )
+			if ( GVarsUsed.Remove ( oldName ) )
 			{
-				gVarsUsed.Add ( newName );
-				if ( usedToDeclMap.ContainsKey ( oldName ) )
+				GVarsUsed.Add ( newName );
+				if ( UsedToDeclMap.ContainsKey ( oldName ) )
 				{
-					usedToDeclMap[newName] = usedToDeclMap[oldName];
-					usedToDeclMap.Remove ( oldName );
+					UsedToDeclMap[newName] = UsedToDeclMap[oldName];
+					UsedToDeclMap.Remove ( oldName );
 				}
 			}
 		}
 
-		private void createEdges ( )
+		private void CreateEdges ( )
 		{
-			foreach ( var block in blocks )
-				blockMap[block.number] = block;
+			foreach ( var block in Blocks )
+				BlockMap[block.Number] = block;
 
-			foreach ( var block in blocks )
+			foreach ( var block in Blocks )
 			{
-				var numbers = block.getOutEdges ( );
+				var numbers = block.GetOutEdges ( );
 				foreach ( var number in numbers )
 				{
-					if ( !blockMap.ContainsKey ( number ) )
+					if ( !BlockMap.ContainsKey ( number ) )
 						continue;
-					block.outEdges.Add ( blockMap[number] );
-					blockMap[number].inEdges.Add ( block );
+					block.OutEdges.Add ( BlockMap[number] );
+					BlockMap[number].InEdges.Add ( block );
 				}
 			}
 		}
 
-		private void removeCasts ( )
+		private void RemoveCasts ( )
 		{
-			blocks
-				.SelectMany ( b => b.gStatements )
+			Blocks
+				.SelectMany ( b => b.GStatements )
 				.Where ( s => s is GCastStmt )
 				.Select ( s => s as GCastStmt )
 				.ToList ( )
-				.ForEach ( cast => Rename ( cast.assignee, cast.v ) );
-			blocks.ForEach ( b =>
+				.ForEach ( cast => Rename ( cast.Assignee, cast.V ) );
+			Blocks.ForEach ( b =>
 			{
-				b.gStatements.RemoveAll ( s => s is GCastStmt );
+				b.GStatements.RemoveAll ( s => s is GCastStmt );
 				b.RenumberLines ( );
 			}
 			);
 		}
 
-		private void preprocess ( GFunction gFunc )
+		private void PreProcess ( GFunction gFunc )
 		{
-			var varMap = getVarMap ( gFunc );
+			var varMap = GetVarMap ( gFunc );
 
 			foreach ( var pair in varMap )
 			{
 				var duc = pair.Value
-					.SelectMany ( x => x.ducAssignments.data )
-					.Union ( pair.Value.SelectMany ( x => x.ducReferences.data ) )
+					.SelectMany ( x => x.DucAssignments.data )
+					.Union ( pair.Value.SelectMany ( x => x.DucReferences.data ) )
 					.ToList ( );
 
 				foreach ( var entry in duc )
 				{
-					var lhsStmt = blockMap[entry.block].gStatements[entry.line - 1];
-					var rhsStmt = gFunc.blockMap[entry.block].gStatements[entry.line - 1];
+					var lhsStmt = BlockMap[entry.block].GStatements[entry.line - 1];
+					var rhsStmt = gFunc.BlockMap[entry.block].GStatements[entry.line - 1];
 
-					if ( rhsStmt.vars.Count == lhsStmt.vars.Count )
+					if ( rhsStmt.Vars.Count == lhsStmt.Vars.Count )
 					{
-						for ( int i = 0; i < lhsStmt.vars.Count; ++i )
+						for ( int i = 0; i < lhsStmt.Vars.Count; ++i )
 						{
-							string lvar = lhsStmt.vars[i];
-							string rvar = rhsStmt.vars[i];
-							if ( gFunc.usedToDeclMap.ContainsKey ( rvar ) &&
-								varMap.ContainsKey ( usedToDeclMap[lvar] ) &&
-								varMap[usedToDeclMap[lvar]].Contains ( gFunc.usedToDeclMap[rvar] ) )
+							string lvar = lhsStmt.Vars[i];
+							string rvar = rhsStmt.Vars[i];
+							if ( gFunc.UsedToDeclMap.ContainsKey ( rvar ) &&
+								varMap.ContainsKey ( UsedToDeclMap[lvar] ) &&
+								varMap[UsedToDeclMap[lvar]].Contains ( gFunc.UsedToDeclMap[rvar] ) )
 								rhsStmt.Rename ( rvar, lvar );
 						}
 					}
@@ -318,49 +315,54 @@ namespace FlowGraph
 
 		public decimal Compare ( GFunction gFunc )
 		{
-			preprocess ( gFunc );
+			PreProcess ( gFunc );
 			decimal count = 0;
-			var lhsStmts = gStatements;
-			var rhsStmts = gFunc.gStatements;
+			var lhsStmts = GStatements;
+			var rhsStmts = gFunc.GStatements;
 			for ( int i = 0; i < lhsStmts.Count && i < rhsStmts.Count; ++i )
 				if ( lhsStmts[i] == rhsStmts[i] )
 					++count;
 			decimal result = 200m * count / ( lhsStmts.Count + rhsStmts.Count );
 
-			gFunc.reset ( );
+			gFunc.Reset ( );
 
 			return result;
 		}
 
-		public void dumpGimple ( string path )
+		public void DumpGimple ( string path )
 		{
 			using ( var stream = new StreamWriter ( path ) )
 			{
-				foreach ( var block in blocks )
+				foreach ( var block in Blocks )
 				{
-					block.gStatements.ForEach ( s => stream.WriteLine ( s ) );
+					block.GStatements.ForEach ( s => stream.WriteLine ( s ) );
 					stream.WriteLine ( );
 				}
 			}
 		}
 
-		public void reset ( )
+		public void Reset ( )
 		{
-			initialize ( gimple );
+			Initialize ( Gimple );
 		}
 
 		/// <summary>
-		/// Compare the <see cref="GFunction.blocks"/> of both <see cref="GFunction"/> using <code>SequenceEqual()</code>.
+		/// Compare the <see cref="GFunction.Blocks"/> of both <see cref="GFunction"/> using <code>SequenceEqual()</code>.
 		/// </summary>
 		/// <param name="lhs">LHS</param>
 		/// <param name="rhs">RHS</param>
 		/// <returns></returns>
 		public static bool operator == ( GFunction lhs, GFunction rhs )
 		{
-			lhs.preprocess ( rhs );
-			bool result = lhs.blocks.SequenceEqual ( rhs.blocks );
+			if ( object.ReferenceEquals ( rhs, null ) )
+				return ( object.ReferenceEquals ( lhs, null ) );
+			else if ( object.ReferenceEquals ( lhs, null ) )
+				return false;
 
-			rhs.initialize ( rhs.gimple );
+			lhs.PreProcess ( rhs );
+			bool result = lhs.Blocks.SequenceEqual ( rhs.Blocks );
+
+			rhs.Initialize ( rhs.Gimple );
 
 			return result;
 		}
@@ -388,18 +390,18 @@ namespace FlowGraph
 			return base.GetHashCode ( );
 		}
 
-		public Dictionary<GVar, List<GVar>> getVarMap ( GFunction gFunc )
+		public Dictionary<GVar, List<GVar>> GetVarMap ( GFunction gFunc )
 		{
 			Dictionary<GVar, List<GVar>> varMap = new Dictionary<GVar, List<GVar>> ( );
 
 			Dictionary<GVar, Dictionary<GVar, decimal>> correlation = new Dictionary<GVar, Dictionary<GVar, decimal>> ( );
-			foreach ( var v1 in gVarsDecl )
+			foreach ( var v1 in GVarsDecl )
 			{
-				foreach ( var v2 in gFunc.gVarsDecl )
+				foreach ( var v2 in gFunc.GVarsDecl )
 				{
 					if ( !correlation.ContainsKey ( v1 ) )
 						correlation[v1] = new Dictionary<GVar, decimal> ( );
-					correlation[v1][v2] = v1.map ( v2 );
+					correlation[v1][v2] = v1.Map ( v2 );
 				}
 				var probable = correlation[v1]
 					.Where ( x => x.Value != 0 )
@@ -409,10 +411,10 @@ namespace FlowGraph
 				var minimal = new List<GVar> ( );
 				foreach ( var v in probable )
 				{
-					if ( !v.isSubsetOf ( v1 ) )
+					if ( !v.IsSubsetOf ( v1 ) )
 						continue;
 					minimal.Add ( v );
-					if ( v1.map ( minimal ) > threshold )
+					if ( v1.Map ( minimal ) > Threshold )
 					{
 						varMap[v1] = minimal;
 						break;
@@ -420,9 +422,9 @@ namespace FlowGraph
 				}
 			}
 
-			foreach ( var v1 in gFunc.gVarsDecl )
+			foreach ( var v1 in gFunc.GVarsDecl )
 			{
-				foreach ( var v2 in gVarsDecl )
+				foreach ( var v2 in GVarsDecl )
 				{
 					var probable = correlation
 						.Where ( x => x.Value[v1] != 0m )
@@ -433,7 +435,7 @@ namespace FlowGraph
 					foreach ( var v in probable )
 					{
 						minimal.Add ( v );
-						if ( v1.map ( minimal ) > threshold )
+						if ( v1.Map ( minimal ) > Threshold )
 						{
 							minimal.ForEach ( m =>
 							{

@@ -100,29 +100,29 @@ namespace FlowGraph
 		/// <summary>
 		/// Line number.
 		/// </summary>
-		public int linenum { get; set; }
+		public int Linenum { get; set; }
 
 		/// <summary>
 		/// Type of statement.
 		/// </summary>
-		public GimpleStmtType stmtType { get; set; }
+		public GimpleStmtType StmtType { get; set; }
 
 		/// <summary>
 		/// Raw text copied from the source GIMPLE.
 		/// </summary>
-		public string text { get; set; }
+		public string Text { get; set; }
 
 		/// <summary>
 		/// Regex pattern to identify the current <see cref="GimpleStmtType"/>.
 		/// </summary>
-		protected string pattern { get; set; }
+		protected string Pattern { get; set; }
 
 		/// <summary>
 		/// List of all the variables used in current statement as a <see cref="List{T}"/> of <see cref="string"/>.
 		/// </summary>
-		public List<string> vars { get; private set; } = new List<string> ( );
+		public List<string> Vars { get; private set; } = new List<string> ( );
 
-		public static bool isValidIdentifier ( string var )
+		public static bool IsValidIdentifier ( string var )
 		{
 			return var.Length > 0 && ( char.IsLetter ( var[0] ) || var[0] == '_' );
 		}
@@ -137,10 +137,10 @@ namespace FlowGraph
 		/// </returns>
 		public virtual List<string> Rename ( string oldName, string newName )
 		{
-			for ( int i = 0; i < vars.Count; ++i )
-				if ( vars[i] == oldName )
-					vars[i] = newName;
-			return vars;
+			for ( int i = 0; i < Vars.Count; ++i )
+				if ( Vars[i] == oldName )
+					Vars[i] = newName;
+			return Vars;
 		}
 
 		/// <summary>
@@ -149,7 +149,7 @@ namespace FlowGraph
 		/// <returns></returns>
 		public override string ToString ( )
 		{
-			return text;
+			return Text;
 		}
 
 		/// <summary>
@@ -204,15 +204,15 @@ namespace FlowGraph
 		/// <summary>
 		/// Base Block number.
 		/// </summary>
-		public int number { get; private set; }
+		public int Number { get; private set; }
 
 		public GBBStmt ( string text )
 		{
-			this.text = text;
-			stmtType = GimpleStmtType.GBB;
-			pattern = myPattern;
+			this.Text = text;
+			StmtType = GimpleStmtType.GBB;
+			Pattern = myPattern;
 			var match = Regex.Match ( text, myPattern );
-			number = Convert.ToInt32 ( match.Groups["number"].Value );
+			Number = Convert.ToInt32 ( match.Groups["number"].Value );
 		}
 
 		/// <summary>
@@ -220,14 +220,14 @@ namespace FlowGraph
 		/// </summary>
 		/// <param name="stmt"></param>
 		/// <returns></returns>
-		public static bool matches ( string stmt )
+		public static bool Matches ( string stmt )
 		{
 			return Regex.IsMatch ( stmt, myPattern );
 		}
 
 		public override string ToString ( )
 		{
-			return $"<bb {number}>:";
+			return $"<bb {Number}>:";
 		}
 
 		public override List<string> Rename ( string oldName, string newName )
@@ -255,24 +255,24 @@ namespace FlowGraph
 	{
 		private static string myPattern = @"# (?<assignee>[\w\.]*) = PHI <(?<var1>[\w\.]*)\((?<bb1>\S*)\)(, (?<var2>[\w\.]*)\((?<bb2>\S*)\))?>";
 
-		public string assignee { get; private set; }
-		public string var1 { get; private set; }
-		public string var2 { get; private set; }
-		public string bb1 { get; private set; }
-		public string bb2 { get; private set; }
+		public string Assignee { get; private set; }
+		public string Var1 { get; private set; }
+		public string Var2 { get; private set; }
+		public string Bb1 { get; private set; }
+		public string Bb2 { get; private set; }
 
 		public GPhiStmt ( string text )
 		{
-			this.text = text;
-			stmtType = GimpleStmtType.GPHI;
-			pattern = myPattern;
+			this.Text = text;
+			StmtType = GimpleStmtType.GPHI;
+			Pattern = myPattern;
 			var match = Regex.Match ( text, myPattern );
-			assignee = match.Groups["assignee"].Value;
-			var1 = match.Groups["var1"].Value;
-			var2 = match.Groups["var2"].Value;
-			bb1 = match.Groups["bb1"].Value;
-			bb2 = match.Groups["bb2"].Value;
-			vars.AddRange ( new[] { assignee, var1, var2 }.Where ( x => isValidIdentifier ( x ) ) );
+			Assignee = match.Groups["assignee"].Value;
+			Var1 = match.Groups["var1"].Value;
+			Var2 = match.Groups["var2"].Value;
+			Bb1 = match.Groups["bb1"].Value;
+			Bb2 = match.Groups["bb2"].Value;
+			Vars.AddRange ( new[] { Assignee, Var1, Var2 }.Where ( x => IsValidIdentifier ( x ) ) );
 		}
 
 
@@ -281,25 +281,25 @@ namespace FlowGraph
 		/// </summary>
 		/// <param name="stmt"></param>
 		/// <returns></returns>
-		public static bool matches ( string stmt )
+		public static bool Matches ( string stmt )
 		{
 			return Regex.IsMatch ( stmt, myPattern );
 		}
 
 		public override string ToString ( )
 		{
-			string second = var2 == "" ? "" : $", {var2}({bb2})";
-			return $"# {assignee} = PHI <{var1}({bb1}){second}>";
+			string second = Var2 == "" ? "" : $", {Var2}({Bb2})";
+			return $"# {Assignee} = PHI <{Var1}({Bb1}){second}>";
 		}
 
 		public override List<string> Rename ( string oldName, string newName )
 		{
-			if ( assignee == oldName )
-				assignee = newName;
-			if ( var1 == oldName )
-				var1 = newName;
-			if ( object.Equals ( var2, oldName ) )
-				var2 = newName;
+			if ( Assignee == oldName )
+				Assignee = newName;
+			if ( Var1 == oldName )
+				Var1 = newName;
+			if ( object.Equals ( Var2, oldName ) )
+				Var2 = newName;
 			return base.Rename ( oldName, newName );
 		}
 
@@ -327,12 +327,12 @@ namespace FlowGraph
 		private string _var1;
 		private string _var2;
 
-		public string assignee
+		public string Assignee
 		{
 			get
 			{
-				if ( GArrayDereference.matches ( _assignee ) )
-					return ( new GArrayDereference ( _assignee ).name );
+				if ( GArrayDereference.Matches ( _assignee ) )
+					return ( new GArrayDereference ( _assignee ).Name );
 				return _assignee;
 			}
 			private set
@@ -340,12 +340,12 @@ namespace FlowGraph
 				_assignee = value;
 			}
 		}
-		public string var1
+		public string Var1
 		{
 			get
 			{
-				if ( GArrayDereference.matches ( _var1 ) )
-					return ( new GArrayDereference ( _var1 ).name );
+				if ( GArrayDereference.Matches ( _var1 ) )
+					return ( new GArrayDereference ( _var1 ).Name );
 				return _var1;
 			}
 			private set
@@ -353,12 +353,12 @@ namespace FlowGraph
 				_var1 = value;
 			}
 		}
-		public string var2
+		public string Var2
 		{
 			get
 			{
-				if ( GArrayDereference.matches ( _var2 ) )
-					return ( new GArrayDereference ( _var2 ).name );
+				if ( GArrayDereference.Matches ( _var2 ) )
+					return ( new GArrayDereference ( _var2 ).Name );
 				return _var2;
 			}
 			private set
@@ -366,19 +366,19 @@ namespace FlowGraph
 				_var2 = value;
 			}
 		}
-		public string op { get; private set; }
+		public string Op { get; private set; }
 
 		public GAssignStmt ( string text )
 		{
-			this.text = text;
-			stmtType = GimpleStmtType.GASSIGN;
-			pattern = myPattern;
+			this.Text = text;
+			StmtType = GimpleStmtType.GASSIGN;
+			Pattern = myPattern;
 			var match = Regex.Match ( text, myPattern );
-			assignee = match.Groups["assignee"].Value;
-			var1 = match.Groups["var1"].Value;
-			var2 = match.Groups["var2"].Value;
-			op = match.Groups["op"].Value;
-			vars.AddRange ( new[] { assignee, var1, var2 }.Where ( x => isValidIdentifier ( x ) ) );
+			Assignee = match.Groups["assignee"].Value;
+			Var1 = match.Groups["var1"].Value;
+			Var2 = match.Groups["var2"].Value;
+			Op = match.Groups["op"].Value;
+			Vars.AddRange ( new[] { Assignee, Var1, Var2 }.Where ( x => IsValidIdentifier ( x ) ) );
 		}
 
 
@@ -387,47 +387,53 @@ namespace FlowGraph
 		/// </summary>
 		/// <param name="stmt"></param>
 		/// <returns></returns>
-		public static bool matches ( string stmt )
+		public static bool Matches ( string stmt )
 		{
 			return Regex.IsMatch ( stmt, myPattern );
 		}
 
 		public override string ToString ( )
 		{
-			string second = var2 == "" ? "" : $" {op} {_var2}";
+			string second = Var2 == "" ? "" : $" {Op} {_var2}";
 			return $"{_assignee} = {_var1}{second};";
 		}
 
 		public override List<string> Rename ( string oldName, string newName )
 		{
-			if ( assignee == oldName )
+			if ( Assignee == oldName )
 			{
-				if ( GArrayDereference.matches ( _assignee ) )
+				if ( GArrayDereference.Matches ( _assignee ) )
 				{
-					var temp = new GArrayDereference ( _assignee );
-					temp.name = newName;
+					var temp = new GArrayDereference ( _assignee )
+					{
+						Name = newName
+					};
 					_assignee = temp.ToString ( );
 				}
 				else
 					_assignee = newName;
 			}
-			if ( var1 == oldName )
+			if ( Var1 == oldName )
 			{
-				if ( GArrayDereference.matches ( _var1 ) )
+				if ( GArrayDereference.Matches ( _var1 ) )
 				{
-					var temp = new GArrayDereference ( _var1 );
-					temp.name = newName;
+					var temp = new GArrayDereference ( _var1 )
+					{
+						Name = newName
+					};
 					_var1 = temp.ToString ( );
 				}
 				else
 					_var1 = newName;
 			}
-			if ( object.Equals ( var2, oldName ) )
+			if ( object.Equals ( Var2, oldName ) )
 			{
-				if ( GArrayDereference.matches ( _var2 ) )
+				if ( GArrayDereference.Matches ( _var2 ) )
 				{
-					var temp = new GArrayDereference ( _var2 );
-					temp.name = newName;
+					var temp = new GArrayDereference ( _var2 )
+					{
+						Name = newName
+					};
 					_var2 = temp.ToString ( );
 				}
 				else
@@ -456,26 +462,26 @@ namespace FlowGraph
 	{
 		private static string myPattern = @"(?<assignee>[\w\.]*) = (?<func>\w*)\s*<(?<args>.*)>;";
 
-		public string assignee { get; private set; }
-		public string func { get; private set; }
-		public List<string> args { get; private set; } = new List<string> ( );
+		public string Assignee { get; private set; }
+		public string FuncName { get; private set; }
+		public List<string> Args { get; private set; } = new List<string> ( );
 
 		public GOptimizedStmt ( string text )
 		{
-			this.text = text;
-			stmtType = GimpleStmtType.GCALL;
-			pattern = myPattern;
+			this.Text = text;
+			StmtType = GimpleStmtType.GCALL;
+			Pattern = myPattern;
 			var match = Regex.Match ( text, myPattern );
-			assignee = match.Groups["assignee"].Value;
-			func = match.Groups["func"].Value;
+			Assignee = match.Groups["assignee"].Value;
+			FuncName = match.Groups["func"].Value;
 			string strArgs = match.Groups["args"].Value;
 			var matches = Regex.Matches ( strArgs, @"((\"".*\"")|([\w\.])(,\s*(\"".*\"")|([\w\.]))*)" );
-			vars.Add ( assignee );
+			Vars.Add ( Assignee );
 			foreach ( Match m in matches )
 			{
-				args.Add ( m.Value );
-				if ( isValidIdentifier ( m.Value ) )
-					vars.Add ( m.Value );
+				Args.Add ( m.Value );
+				if ( IsValidIdentifier ( m.Value ) )
+					Vars.Add ( m.Value );
 			}
 		}
 
@@ -484,23 +490,23 @@ namespace FlowGraph
 		/// </summary>
 		/// <param name="stmt"></param>
 		/// <returns></returns>
-		public static bool matches ( string stmt )
+		public static bool Matches ( string stmt )
 		{
 			return Regex.IsMatch ( stmt, myPattern );
 		}
 
 		public override string ToString ( )
 		{
-			return $"{assignee} = {func} <{string.Join ( ", ", args )}>;";
+			return $"{Assignee} = {FuncName} <{string.Join ( ", ", Args )}>;";
 		}
 
 		public override List<string> Rename ( string oldName, string newName )
 		{
-			if ( assignee == oldName )
-				assignee = newName;
-			for ( int i = 0; i < args.Count; ++i )
-				if ( args[i] == oldName )
-					args[i] = newName;
+			if ( Assignee == oldName )
+				Assignee = newName;
+			for ( int i = 0; i < Args.Count; ++i )
+				if ( Args[i] == oldName )
+					Args[i] = newName;
 			return base.Rename ( oldName, newName );
 		}
 
@@ -524,20 +530,20 @@ namespace FlowGraph
 	{
 		private static string myPattern = @"if \((?<op1>[\w\.]*) (?<op>\S*) (?<op2>[\w\.]*)\)";
 
-		public string op1 { get; private set; }
-		public string op2 { get; private set; }
-		public string op { get; private set; }
+		public string Op1 { get; private set; }
+		public string Op2 { get; private set; }
+		public string Op { get; private set; }
 
 		public GCondStmt ( string text )
 		{
-			this.text = text;
-			stmtType = GimpleStmtType.GCOND;
-			pattern = myPattern;
+			this.Text = text;
+			StmtType = GimpleStmtType.GCOND;
+			Pattern = myPattern;
 			var match = Regex.Match ( text, myPattern );
-			op1 = match.Groups["op1"].Value;
-			op2 = match.Groups["op2"].Value;
-			op = match.Groups["op"].Value;
-			vars.AddRange ( new[] { op1, op2 }.Where ( x => isValidIdentifier ( x ) ) );
+			Op1 = match.Groups["op1"].Value;
+			Op2 = match.Groups["op2"].Value;
+			Op = match.Groups["op"].Value;
+			Vars.AddRange ( new[] { Op1, Op2 }.Where ( x => IsValidIdentifier ( x ) ) );
 		}
 
 
@@ -546,22 +552,22 @@ namespace FlowGraph
 		/// </summary>
 		/// <param name="stmt"></param>
 		/// <returns></returns>
-		public static bool matches ( string stmt )
+		public static bool Matches ( string stmt )
 		{
 			return Regex.IsMatch ( stmt, myPattern );
 		}
 
 		public override string ToString ( )
 		{
-			return $"if ({op1} {op} {op2})";
+			return $"if ({Op1} {Op} {Op2})";
 		}
 
 		public override List<string> Rename ( string oldName, string newName )
 		{
-			if ( op1 == oldName )
-				op1 = newName;
-			if ( op2 == oldName )
-				op2 = newName;
+			if ( Op1 == oldName )
+				Op1 = newName;
+			if ( Op2 == oldName )
+				Op2 = newName;
 			return base.Rename ( oldName, newName );
 		}
 	}
@@ -575,9 +581,9 @@ namespace FlowGraph
 
 		public GElseStmt ( string text )
 		{
-			this.text = text;
-			stmtType = GimpleStmtType.GELSE;
-			pattern = myPattern;
+			this.Text = text;
+			StmtType = GimpleStmtType.GELSE;
+			Pattern = myPattern;
 		}
 
 
@@ -586,7 +592,7 @@ namespace FlowGraph
 		/// </summary>
 		/// <param name="stmt"></param>
 		/// <returns></returns>
-		public static bool matches ( string stmt )
+		public static bool Matches ( string stmt )
 		{
 			return Regex.IsMatch ( stmt, myPattern );
 		}
@@ -621,15 +627,15 @@ namespace FlowGraph
 	{
 		private static string myPattern = "goto <bb (?<number>[0-9]*)>;";
 
-		public int number { get; private set; }
+		public int Number { get; private set; }
 
 		public GGotoStmt ( string text )
 		{
-			this.text = text;
-			stmtType = GimpleStmtType.GGOTO;
-			pattern = myPattern;
+			this.Text = text;
+			StmtType = GimpleStmtType.GGOTO;
+			Pattern = myPattern;
 			var match = Regex.Match ( text, myPattern );
-			number = Convert.ToInt32 ( match.Groups["number"].Value );
+			Number = Convert.ToInt32 ( match.Groups["number"].Value );
 		}
 
 
@@ -638,14 +644,14 @@ namespace FlowGraph
 		/// </summary>
 		/// <param name="stmt"></param>
 		/// <returns></returns>
-		public static bool matches ( string stmt )
+		public static bool Matches ( string stmt )
 		{
 			return Regex.IsMatch ( stmt, myPattern );
 		}
 
 		public override string ToString ( )
 		{
-			return $"goto <bb {number}>;";
+			return $"goto <bb {Number}>;";
 		}
 
 		public override List<string> Rename ( string oldName, string newName )
@@ -673,25 +679,25 @@ namespace FlowGraph
 	{
 		private static string myPattern = @"(?<funcname>\S*) \((?<args>.*)\);";
 
-		public string funcname { get; private set; }
-		public List<string> args { get; private set; } = new List<string> ( );
+		public string FuncName { get; private set; }
+		public List<string> Args { get; private set; } = new List<string> ( );
 
 		public GCallStmt ( string text )
 		{
-			this.text = text;
-			stmtType = GimpleStmtType.GCALL;
-			pattern = myPattern;
+			this.Text = text;
+			StmtType = GimpleStmtType.GCALL;
+			Pattern = myPattern;
 			var match = Regex.Match ( text, myPattern );
-			funcname = match.Groups["funcname"].Value;
+			FuncName = match.Groups["funcname"].Value;
 			string strArgs = match.Groups["args"].Value;
 			var matches = Regex.Matches ( strArgs, @"^(\&\"".*\""\[\d*\])|((\"""".*\"""")|([\w\.]*)(,\s*(\"""".*\"""")|([\w\.]))*)$" );
 			foreach ( Match m in matches )
 			{
 				if ( string.IsNullOrWhiteSpace ( m.Value ) )
 					continue;
-				args.Add ( m.Value );
-				if ( isValidIdentifier ( m.Value ) )
-					vars.Add ( m.Value );
+				Args.Add ( m.Value );
+				if ( IsValidIdentifier ( m.Value ) )
+					Vars.Add ( m.Value );
 			}
 		}
 
@@ -701,21 +707,21 @@ namespace FlowGraph
 		/// </summary>
 		/// <param name="stmt"></param>
 		/// <returns></returns>
-		public static bool matches ( string stmt )
+		public static bool Matches ( string stmt )
 		{
 			return Regex.IsMatch ( stmt, myPattern );
 		}
 
 		public override string ToString ( )
 		{
-			return $"{funcname} ({string.Join ( ", ", args )});";
+			return $"{FuncName} ({string.Join ( ", ", Args )});";
 		}
 
 		public override List<string> Rename ( string oldName, string newName )
 		{
-			for ( int i = 0; i < args.Count; ++i )
-				if ( args[i] == oldName )
-					args[i] = newName;
+			for ( int i = 0; i < Args.Count; ++i )
+				if ( Args[i] == oldName )
+					Args[i] = newName;
 			return base.Rename ( oldName, newName );
 		}
 
@@ -724,9 +730,9 @@ namespace FlowGraph
 			if ( obj is GCallStmt )
 			{
 				var stmt = obj as GCallStmt;
-				if ( funcname != stmt.funcname )
+				if ( FuncName != stmt.FuncName )
 					return false;
-				return vars.SequenceEqual ( stmt.vars );
+				return Vars.SequenceEqual ( stmt.Vars );
 			}
 			return base.Equals ( obj );
 		}
@@ -747,12 +753,12 @@ namespace FlowGraph
 		private string _assignee;
 		private string _v;
 
-		public string assignee
+		public string Assignee
 		{
 			get
 			{
-				if ( GArrayDereference.matches ( _assignee ) )
-					return ( new GArrayDereference ( _assignee ).name );
+				if ( GArrayDereference.Matches ( _assignee ) )
+					return ( new GArrayDereference ( _assignee ).Name );
 				return _assignee;
 			}
 			private set
@@ -760,13 +766,13 @@ namespace FlowGraph
 				_assignee = value;
 			}
 		}
-		public string cast { get; private set; }
-		public string v
+		public string Cast { get; private set; }
+		public string V
 		{
 			get
 			{
-				if ( GArrayDereference.matches ( _v ) )
-					return ( new GArrayDereference ( _v ).name );
+				if ( GArrayDereference.Matches ( _v ) )
+					return ( new GArrayDereference ( _v ).Name );
 				return _v;
 			}
 			private set
@@ -777,14 +783,14 @@ namespace FlowGraph
 
 		public GCastStmt ( string text )
 		{
-			this.text = text;
-			stmtType = GimpleStmtType.GCAST;
-			pattern = myPattern;
+			this.Text = text;
+			StmtType = GimpleStmtType.GCAST;
+			Pattern = myPattern;
 			var match = Regex.Match ( text, myPattern );
-			assignee = match.Groups["assignee"].Value;
-			cast = match.Groups["cast"].Value;
-			v = match.Groups["v"].Value;
-			vars.AddRange ( new[] { assignee, v }.Where ( x => isValidIdentifier ( x ) ) );
+			Assignee = match.Groups["assignee"].Value;
+			Cast = match.Groups["cast"].Value;
+			V = match.Groups["v"].Value;
+			Vars.AddRange ( new[] { Assignee, V }.Where ( x => IsValidIdentifier ( x ) ) );
 		}
 
 		/// <summary>
@@ -792,36 +798,40 @@ namespace FlowGraph
 		/// </summary>
 		/// <param name="stmt"></param>
 		/// <returns></returns>
-		public static bool matches ( string stmt )
+		public static bool Matches ( string stmt )
 		{
 			return Regex.IsMatch ( stmt, myPattern );
 		}
 
 		public override string ToString ( )
 		{
-			return $"{_assignee} = ({cast}) {_v};";
+			return $"{_assignee} = ({Cast}) {_v};";
 		}
 
 		public override List<string> Rename ( string oldName, string newName )
 		{
 
-			if ( assignee == oldName )
+			if ( Assignee == oldName )
 			{
-				if ( GArrayDereference.matches ( _assignee ) )
+				if ( GArrayDereference.Matches ( _assignee ) )
 				{
-					var temp = new GArrayDereference ( _assignee );
-					temp.name = newName;
+					var temp = new GArrayDereference ( _assignee )
+					{
+						Name = newName
+					};
 					_assignee = temp.ToString ( );
 				}
 				else
 					_assignee = newName;
 			}
-			if ( v == oldName )
+			if ( V == oldName )
 			{
-				if ( GArrayDereference.matches ( _v ) )
+				if ( GArrayDereference.Matches ( _v ) )
 				{
-					var temp = new GArrayDereference ( _v );
-					temp.name = newName;
+					var temp = new GArrayDereference ( _v )
+					{
+						Name = newName
+					};
 					_v = temp.ToString ( );
 				}
 				else
@@ -850,16 +860,16 @@ namespace FlowGraph
 	{
 		private static string myPattern = @"return( (?<retval>\S*))?;";
 
-		public string retval { get; private set; }
+		public string Retval { get; private set; }
 
 		public GReturnStmt ( string text )
 		{
-			this.text = text;
-			stmtType = GimpleStmtType.GRETURN;
-			pattern = myPattern;
+			this.Text = text;
+			StmtType = GimpleStmtType.GRETURN;
+			Pattern = myPattern;
 			var match = Regex.Match ( text, myPattern );
-			retval = match.Groups["retval"].Value;
-			vars.AddRange ( new[] { retval }.Where ( x => isValidIdentifier ( x ) ) );
+			Retval = match.Groups["retval"].Value;
+			Vars.AddRange ( new[] { Retval }.Where ( x => IsValidIdentifier ( x ) ) );
 		}
 
 		/// <summary>
@@ -867,21 +877,21 @@ namespace FlowGraph
 		/// </summary>
 		/// <param name="stmt"></param>
 		/// <returns></returns>
-		public static bool matches ( string stmt )
+		public static bool Matches ( string stmt )
 		{
 			return Regex.IsMatch ( stmt, myPattern );
 		}
 
 		public override string ToString ( )
 		{
-			string val = retval == "" ? "" : $" {retval}";
+			string val = Retval == "" ? "" : $" {Retval}";
 			return $"return{val};";
 		}
 
 		public override List<string> Rename ( string oldName, string newName )
 		{
-			if ( object.Equals ( retval, oldName ) )
-				retval = newName;
+			if ( object.Equals ( Retval, oldName ) )
+				Retval = newName;
 			return base.Rename ( oldName, newName );
 		}
 
@@ -907,9 +917,9 @@ namespace FlowGraph
 
 		public GLabelStmt ( string text )
 		{
-			this.text = text;
-			stmtType = GimpleStmtType.GLABEL;
-			pattern = myPattern;
+			this.Text = text;
+			StmtType = GimpleStmtType.GLABEL;
+			Pattern = myPattern;
 			throw new NotImplementedException ( );
 		}
 
@@ -919,7 +929,7 @@ namespace FlowGraph
 		/// </summary>
 		/// <param name="stmt"></param>
 		/// <returns></returns>
-		public static bool matches ( string stmt )
+		public static bool Matches ( string stmt )
 		{
 			return Regex.IsMatch ( stmt, myPattern );
 		}
@@ -939,9 +949,9 @@ namespace FlowGraph
 
 		public GSwitchStmt ( string text )
 		{
-			this.text = text;
-			stmtType = GimpleStmtType.GSWITCH;
-			pattern = myPattern;
+			this.Text = text;
+			StmtType = GimpleStmtType.GSWITCH;
+			Pattern = myPattern;
 			throw new NotImplementedException ( );
 		}
 
@@ -951,7 +961,7 @@ namespace FlowGraph
 		/// </summary>
 		/// <param name="stmt"></param>
 		/// <returns></returns>
-		public static bool matches ( string stmt )
+		public static bool Matches ( string stmt )
 		{
 			return Regex.IsMatch ( stmt, myPattern );
 		}

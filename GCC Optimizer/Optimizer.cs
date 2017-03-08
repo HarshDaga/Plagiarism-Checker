@@ -68,43 +68,11 @@ namespace GCC_Optimizer
 	[DebuggerDisplay ( "{fileName}" )]
 	public class Optimizer
 	{
-		public string fileName { get; private set; }
-		public List<string> dotOutputs { get; private set; }
-		public string batchFile { get; set; }
-		public List<string> gccFlags { get; set; }
-		public List<string> suffixes { get; set; }
-		public List<DotOutputFormat> dotOutputFormats { get; set; }
-		public List<string> originalSource { get; private set; } = null;
-		public List<string> GIMPLE { get; private set; } = null;
-		public List<string> originalGIMPLE { get; private set; } = null;
-		public OptimizeResult lastError { get; private set; } = OptimizeResult.None;
-		public string stdout { get; private set; } = "";
-		public string stderr { get; private set; } = "";
-		public bool suppressOutput { get; set; } = true;
-		public bool rebuild { get; set; } = true;
-
-		public Optimizer ( string fileName )
+		public static class Defaults
 		{
-			if ( !File.Exists ( fileName ) )
-			{
-				lastError = OptimizeResult.FileNotFound;
-				throw new FileNotFoundException ( $"{fileName} couldn't be found." );
-			}
-
-			if ( fileName.Contains ( "\\" ) )
-			{
-				this.fileName = Path.GetFileName ( fileName );
-				File.Copy ( fileName, this.fileName, true );
-			}
-			else
-				this.fileName = fileName;
-
-			if ( batchFile == null )
-				batchFile = "____temp.bat";
-
-			if ( gccFlags == default ( List<string> ) )
-			{
-				gccFlags = new List<string>
+			public static readonly string BatchFile = "____temp.bat";
+			public static readonly List<string> GccFlags =
+				new List<string>
 				{
 					"-Ofast",
 					"-fdump-tree-optimized-graph",
@@ -114,15 +82,68 @@ namespace GCC_Optimizer
 					"-fgcse",
 					"-fmerge-all-constants"
 				};
+			public static readonly List<string> Suffixes =
+				new List<string>
+				{
+					".190t.optimized",
+					".191t.optimized"
+				};
+			public static readonly List<DotOutputFormat> DotOutputFormats =
+				new List<DotOutputFormat>
+				{
+					DotOutputFormat.png,
+					DotOutputFormat.plain
+				};
+			public static readonly bool SuppressOutput = true;
+			public static readonly bool Rebuild = true;
+			public static OptimizeResult LastError = OptimizeResult.None;
+		}
+
+		public string FileName { get; private set; }
+		public List<string> DotOutputs { get; private set; }
+		public string BatchFile { get; set; }
+		public List<string> GccFlags { get; set; }
+		public List<string> Suffixes { get; set; }
+		public List<DotOutputFormat> DotOutputFormats { get; set; }
+		public List<string> OriginalSource { get; private set; } = null;
+		public List<string> GIMPLE { get; private set; } = null;
+		public List<string> OriginalGIMPLE { get; private set; } = null;
+		public OptimizeResult LastError { get; private set; } = Defaults.LastError;
+		public string Stdout { get; private set; } = "";
+		public string Stderr { get; private set; } = "";
+		public bool SuppressOutput { get; set; } = Defaults.SuppressOutput;
+		public bool Rebuild { get; set; } = Defaults.Rebuild;
+
+		public Optimizer ( string fileName )
+		{
+			if ( !File.Exists ( fileName ) )
+			{
+				LastError = OptimizeResult.FileNotFound;
+				return;
+				//throw new FileNotFoundException ( $"{fileName} couldn't be found." );
 			}
 
-			if ( dotOutputFormats == default ( List<DotOutputFormat> ) )
-				dotOutputFormats = new List<DotOutputFormat> { DotOutputFormat.png, DotOutputFormat.plain };
-			
-			if ( suffixes == default ( List<string> ) )
-				suffixes = new List<string> { ".190t.optimized", ".191t.optimized" };
+			if ( Path.IsPathRooted ( fileName ) )
+			{
+				this.FileName = Path.GetFileName ( fileName );
+				File.Copy ( fileName, this.FileName, true );
+			}
+			else
+				this.FileName = fileName;
 
-			dotOutputs = new List<string> ( );
+			if ( BatchFile == null )
+				BatchFile = Defaults.BatchFile;
+
+			if ( GccFlags == null )
+				GccFlags = Defaults.GccFlags.ToList ( );
+
+			if ( DotOutputFormats == null )
+				DotOutputFormats = Defaults.DotOutputFormats.ToList ( );
+
+			if ( Suffixes == null )
+				Suffixes = Defaults.Suffixes.ToList ( );
+
+			DotOutputs = new List<string> ( );
 		}
 
 		public bool Run ( )
@@ -130,18 +151,18 @@ namespace GCC_Optimizer
 			if ( !VerifyFile ( ) )
 				return false;
 
-			originalSource = File.ReadAllLines ( this.fileName ).ToList ( );
+			OriginalSource = File.ReadAllLines ( this.FileName ).ToList ( );
 
 			string prog = Flatten ( );
 
 			if ( !CompileAndOptimize ( ) )
 				return false;
 
-			GIMPLE = CleanGIMPLE ( originalGIMPLE );
+			GIMPLE = CleanGIMPLE ( OriginalGIMPLE );
 
 			// Replace with original
 			{
-				var fileStream = File.Open ( this.fileName, FileMode.Truncate );
+				var fileStream = File.Open ( this.FileName, FileMode.Truncate );
 				var byteArray = Encoding.ASCII.GetBytes ( prog );
 				fileStream.Write ( byteArray, 0, byteArray.Length );
 				fileStream.Close ( );
@@ -152,15 +173,15 @@ namespace GCC_Optimizer
 
 		private bool VerifyFile ( )
 		{
-			if ( !fileName.EndsWith ( ".c" ) )
+			if ( !FileName.EndsWith ( ".c" ) )
 			{
-				dotOutputs = null;
-				lastError = OptimizeResult.BadExtension;
+				DotOutputs = null;
+				LastError = OptimizeResult.BadExtension;
 				return false;
 			}
-			if ( !File.Exists ( fileName ) )
+			if ( !File.Exists ( FileName ) )
 			{
-				lastError = OptimizeResult.FileNotFound;
+				LastError = OptimizeResult.FileNotFound;
 				return false;
 			}
 
@@ -173,13 +194,13 @@ namespace GCC_Optimizer
 		/// <returns></returns>
 		private string Flatten ( )
 		{
-			var prog = File.ReadAllText ( fileName );
+			var prog = File.ReadAllText ( FileName );
 			string pattern = @"(.* )?main\s*\(.*\).*";
 			var match = Regex.Match ( prog, pattern );
 			if ( !match.Value.Contains ( "flatten" ) )
 			{
 				var modified = Regex.Replace ( prog, @"(main\(.*\))", " __attribute__((flatten))$1" );
-				var fileStream = File.Open ( fileName, FileMode.Truncate );
+				var fileStream = File.Open ( FileName, FileMode.Truncate );
 				var byteArray = Encoding.ASCII.GetBytes ( modified );
 				fileStream.Write ( byteArray, 0, byteArray.Length );
 				fileStream.Close ( );
@@ -189,18 +210,18 @@ namespace GCC_Optimizer
 
 		private bool GimpleExists ( )
 		{
-			var prefix = Path.GetFileNameWithoutExtension ( fileName );
+			var prefix = Path.GetFileNameWithoutExtension ( FileName );
 			var dir = new DirectoryInfo ( prefix );
 			if ( dir.Exists )
 			{
 				var files = dir.GetFiles ( );
-				var cfile = files.FirstOrDefault ( f => f.Name == fileName );
+				var cfile = files.FirstOrDefault ( f => f.Name == FileName );
 				if ( cfile != null )
 				{
 					var gimple = files.FirstOrDefault ( f => f.Name == $"{prefix}.GIMPLE" );
 					if ( gimple != null )
 					{
-						originalGIMPLE = File.ReadAllLines ( gimple.FullName ).ToList ( );
+						OriginalGIMPLE = File.ReadAllLines ( gimple.FullName ).ToList ( );
 						return true;
 					}
 				}
@@ -215,32 +236,32 @@ namespace GCC_Optimizer
 		/// <returns>true on successful compilation.</returns>
 		private bool CompileAndOptimize ( )
 		{
-			if ( !rebuild && GimpleExists ( ) )
+			if ( !Rebuild && GimpleExists ( ) )
 				return true;
 
-			var prefix = Path.GetFileNameWithoutExtension ( fileName );
+			var prefix = Path.GetFileNameWithoutExtension ( FileName );
 			var dir = new DirectoryInfo ( prefix );
 
 			string cmd;
 
 			// Compile the file
 			{
-				cmd = $"gcc {string.Join ( " ", gccFlags )} \"" + fileName + "\"\n";
+				cmd = $"gcc {string.Join ( " ", GccFlags )} \"" + FileName + "\"\n";
 				var results = ExecCmd ( cmd );
-				stdout += results.Item1;
-				stderr += results.Item2;
+				Stdout += results.Item1;
+				Stderr += results.Item2;
 				if ( results.Item2.Length > 0 )
 				{
-					lastError = OptimizeResult.CompileError;                             // Compilation Error
+					LastError = OptimizeResult.CompileError;                             // Compilation Error
 					return false;
 				}
 				File.Delete ( "a.exe" );
 			}
 
 			string oldOptimizedGIMPLE = null, oldOptimizedDot = null;
-			foreach ( var suffix in suffixes )
-				if ( File.Exists ( fileName + suffix ) )
-					oldOptimizedGIMPLE = fileName + suffix;
+			foreach ( var suffix in Suffixes )
+				if ( File.Exists ( FileName + suffix ) )
+					oldOptimizedGIMPLE = FileName + suffix;
 			oldOptimizedDot = oldOptimizedGIMPLE + ".dot";
 
 			if ( dir.Exists )
@@ -262,18 +283,18 @@ namespace GCC_Optimizer
 			{
 				File.Move ( oldOptimizedGIMPLE, $"{dir.Name}\\{optimizedGIMPLE}" );
 				File.Move ( oldOptimizedDot, $"{dir.Name}\\{optimizedDot}" );
-				File.Copy ( fileName, $"{dir.Name}\\{fileName}" );
+				File.Copy ( FileName, $"{dir.Name}\\{FileName}" );
 			}
 
-			originalGIMPLE = File.ReadAllLines ( $"{dir.Name}\\{optimizedGIMPLE}" ).ToList ( );
+			OriginalGIMPLE = File.ReadAllLines ( $"{dir.Name}\\{optimizedGIMPLE}" ).ToList ( );
 
-			foreach ( var format in dotOutputFormats )
+			foreach ( var format in DotOutputFormats )
 			{
 				cmd = $"dot -T{format} -O \"{prefix}\\{optimizedDot}\"";
 				var results = ExecCmd ( cmd );
-				stdout += results.Item1;
-				stderr += results.Item2;
-				dotOutputs.Add ( $"{optimizedDot}.{format}" );
+				Stdout += results.Item1;
+				Stderr += results.Item2;
+				DotOutputs.Add ( $"{optimizedDot}.{format}" );
 			}
 
 			return true;
@@ -306,7 +327,7 @@ namespace GCC_Optimizer
 		/// <returns><see cref="Tuple{STDOUT, STDERR}"/>.</returns>
 		public Tuple<string, string> ExecCmd ( string cmd )
 		{
-			var fileStream = File.Create ( batchFile );
+			var fileStream = File.Create ( BatchFile );
 			var byteArray = Encoding.ASCII.GetBytes ( cmd );
 			fileStream.Write ( byteArray, 0, byteArray.Length );
 			fileStream.Close ( );
@@ -316,7 +337,7 @@ namespace GCC_Optimizer
 			p.StartInfo.UseShellExecute = false;
 			p.StartInfo.RedirectStandardOutput = true;
 			p.StartInfo.RedirectStandardError = true;
-			p.StartInfo.FileName = batchFile;
+			p.StartInfo.FileName = BatchFile;
 			p.Start ( );
 			// Do not wait for the child process to exit before
 			// reading to the end of its redirected stream.
@@ -324,14 +345,14 @@ namespace GCC_Optimizer
 			// Read the output stream first and then wait.
 			string output = p.StandardOutput.ReadToEnd ( );
 			string error = p.StandardError.ReadToEnd ( );
-			if ( !suppressOutput )
+			if ( !SuppressOutput )
 			{
 				Console.WriteLine ( output );
 				Console.WriteLine ( error );
 			}
 			p.WaitForExit ( );
 
-			File.Delete ( batchFile );
+			File.Delete ( BatchFile );
 
 			return new Tuple<string, string> ( output, error );
 		}

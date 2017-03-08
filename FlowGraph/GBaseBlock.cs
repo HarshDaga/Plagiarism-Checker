@@ -16,24 +16,24 @@ namespace FlowGraph
 		/// <summary>
 		/// Block Number.
 		/// </summary>
-		public int number { get; private set; }
+		public int Number { get; private set; }
 
 		/// <summary>
 		/// <see cref="List{T}"/> of <see cref="GimpleStmt"/> containing all the statements used in the block.
 		/// </summary>
-		public List<GimpleStmt> gStatements { get; private set; } = new List<GimpleStmt> ( );
+		public List<GimpleStmt> GStatements { get; private set; } = new List<GimpleStmt> ( );
 
 		/// <summary>
 		/// <see cref="List{T}"/> of <see cref="GimpleStmt"/> containing all the blocks referenced from <c>this</c> block.
 		/// </summary>
-		public List<GBaseBlock> outEdges { get; set; } = new List<GBaseBlock> ( );
+		public List<GBaseBlock> OutEdges { get; set; } = new List<GBaseBlock> ( );
 
 		/// <summary>
 		/// <see cref="List{T}"/> of <see cref="GimpleStmt"/> containing all the blocks that reference <c>this</c> block.
 		/// </summary>
-		public List<GBaseBlock> inEdges { get; set; } = new List<GBaseBlock> ( );
+		public List<GBaseBlock> InEdges { get; set; } = new List<GBaseBlock> ( );
 
-		public HashSet<string> vars { get; private set; } = new HashSet<string> ( );
+		public HashSet<string> Vars { get; private set; } = new HashSet<string> ( );
 
 		/// <summary>
 		/// Extract all the <see cref="GBaseBlock"/>s from the given GIMPLE source.
@@ -42,14 +42,14 @@ namespace FlowGraph
 		/// <returns>
 		/// <see cref="List{T}"/> of <see cref="GBaseBlock"/> containing all the Base Blocks.
 		/// </returns>
-		public static List<GBaseBlock> getBaseBlocks ( List<string> gimple )
+		public static List<GBaseBlock> GetBaseBlocks ( List<string> gimple )
 		{
 			Block block = new Block ( );
 			List<Block> blocks = new List<Block> ( );
 			bool readingBlock = false;
 			foreach ( var line in gimple )
 			{
-				if ( GBBStmt.matches ( line ) )
+				if ( GBBStmt.Matches ( line ) )
 					readingBlock = true;
 				if ( line.Length == 0 )
 				{
@@ -73,7 +73,7 @@ namespace FlowGraph
 		/// </summary>
 		/// <param name="stmt">GIMPLE statement as a <see cref="string"/>.</param>
 		/// <returns></returns>
-		public static GimpleStmt toGimpleStmt ( string stmt )
+		public static GimpleStmt ToGimpleStmt ( string stmt )
 		{
 			Type[] types =
 			{
@@ -92,7 +92,7 @@ namespace FlowGraph
 			};
 			foreach ( var type in types )
 			{
-				if ( Convert.ToBoolean ( type.GetMethod ( "matches" ).Invoke ( null, new object[] { stmt } ) ) )
+				if ( Convert.ToBoolean ( type.GetMethod ( "Matches" ).Invoke ( null, new object[] { stmt } ) ) )
 					return type.GetConstructor ( new[] { typeof ( string ) } ).Invoke ( new object[] { stmt } ) as GimpleStmt;
 			}
 			return null;
@@ -107,16 +107,16 @@ namespace FlowGraph
 			if ( block.Count == 0 )
 				throw new ArgumentOutOfRangeException ( );
 			var gBlockDecl = new GBBStmt ( block[0] );
-			number = gBlockDecl.number;
+			Number = gBlockDecl.Number;
 			int line = 1;
 			foreach ( var stmt in block )
 			{
-				var gStmt = toGimpleStmt ( stmt );
+				var gStmt = ToGimpleStmt ( stmt );
 				if ( gStmt != null )
 				{
-					gStmt.linenum = line;
-					gStatements.Add ( gStmt );
-					vars.UnionWith ( gStmt.vars );
+					gStmt.Linenum = line;
+					GStatements.Add ( gStmt );
+					Vars.UnionWith ( gStmt.Vars );
 				}
 				++line;
 			}
@@ -124,26 +124,26 @@ namespace FlowGraph
 
 		public void RenumberLines ( )
 		{
-			for ( int i = 0; i != gStatements.Count; ++i )
-				gStatements[i].linenum = i + 1;
+			for ( int i = 0; i != GStatements.Count; ++i )
+				GStatements[i].Linenum = i + 1;
 		}
 
 		public HashSet<string> Rename ( string oldName, string newName )
 		{
-			vars.Clear ( );
-			gStatements.ForEach ( stmt => vars.UnionWith ( stmt.Rename ( oldName, newName ) ) );
-			return vars;
+			Vars.Clear ( );
+			GStatements.ForEach ( stmt => Vars.UnionWith ( stmt.Rename ( oldName, newName ) ) );
+			return Vars;
 		}
 
 		/// <summary>
-		/// Find and return the <see cref="GBBStmt.number"/> of all <see cref="GimpleStmtType.GGOTO"/> statements.
+		/// Find and return the <see cref="GBBStmt.Number"/> of all <see cref="GimpleStmtType.GGOTO"/> statements.
 		/// </summary>
 		/// <returns></returns>
-		public List<int> getOutEdges ( )
+		public List<int> GetOutEdges ( )
 		{
-			var gotos = gStatements.Where ( x => x is GGotoStmt ).Cast<GGotoStmt> ( ).Select ( stmt => stmt.number ).ToList ( );
-			if ( !( gStatements.Last ( ) is GGotoStmt ) )
-				gotos.Add ( number + 1 );
+			var gotos = GStatements.Where ( x => x is GGotoStmt ).Cast<GGotoStmt> ( ).Select ( stmt => stmt.Number ).ToList ( );
+			if ( !( GStatements.Last ( ) is GGotoStmt ) )
+				gotos.Add ( Number + 1 );
 			return gotos;
 		}
 
@@ -155,7 +155,7 @@ namespace FlowGraph
 		/// <returns></returns>
 		public static bool operator == ( GBaseBlock bb1, GBaseBlock bb2 )
 		{
-			return bb1.gStatements.SequenceEqual ( bb2.gStatements );
+			return bb1.GStatements.SequenceEqual ( bb2.GStatements );
 		}
 
 		/// <summary>
@@ -166,7 +166,7 @@ namespace FlowGraph
 		/// <returns></returns>
 		public static bool operator != ( GBaseBlock bb1, GBaseBlock bb2 )
 		{
-			return !bb1.gStatements.SequenceEqual ( bb2.gStatements );
+			return !bb1.GStatements.SequenceEqual ( bb2.GStatements );
 		}
 
 		/// <summary>
@@ -189,7 +189,7 @@ namespace FlowGraph
 
 		public override string ToString ( )
 		{
-			return string.Join ( "\n", gStatements );
+			return string.Join ( "\n", GStatements );
 		}
 	}
 }

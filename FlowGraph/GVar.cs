@@ -52,7 +52,7 @@ public class GVar
 
 		public HashSet<DefineUseChainEntry> data = new HashSet<DefineUseChainEntry> ( );
 
-		public void add ( int block, int line )
+		public void Add ( int block, int line )
 		{
 			data.Add ( new DefineUseChainEntry ( block, line ) );
 		}
@@ -88,35 +88,35 @@ public class GVar
 
 	}
 
-	public string name { get; set; }
-	public string type { get; set; }
+	public string Name { get; set; }
+	public string Type { get; set; }
 
-	public DefineUseChain ducAssignments { get; set; } = new DefineUseChain ( );
-	public DefineUseChain ducReferences { get; set; } = new DefineUseChain ( );
+	public DefineUseChain DucAssignments { get; set; } = new DefineUseChain ( );
+	public DefineUseChain DucReferences { get; set; } = new DefineUseChain ( );
 
 	public GVar ( )
 	{
 	}
 
-	public bool isSubsetOf ( GVar v )
+	public bool IsSubsetOf ( GVar v )
 	{
-		return ( ducAssignments.data.IsSubsetOf ( v.ducAssignments.data ) &&
-			ducReferences.data.IsSubsetOf ( v.ducReferences.data ) );
+		return ( DucAssignments.data.IsSubsetOf ( v.DucAssignments.data ) &&
+			DucReferences.data.IsSubsetOf ( v.DucReferences.data ) );
 	}
 
-	public decimal map ( GVar v )
+	public decimal Map ( GVar v )
 	{
 		decimal result = 0m;
-		int totalAssignments = v.ducAssignments.data.Count + ducAssignments.data.Count;
-		int totalReferences = v.ducReferences.data.Count + ducReferences.data.Count;
+		int totalAssignments = v.DucAssignments.data.Count + DucAssignments.data.Count;
+		int totalReferences = v.DucReferences.data.Count + DucReferences.data.Count;
 		if ( totalAssignments != 0 )
 		{
-			var common = v.ducAssignments.data.Intersect ( ducAssignments.data ).ToList ( ).Count;
+			var common = v.DucAssignments.data.Intersect ( DucAssignments.data ).ToList ( ).Count;
 			result += ( 1m * common ) / ( totalAssignments );
 		}
 		if ( totalReferences != 0 )
 		{
-			var common = v.ducReferences.data.Intersect ( ducReferences.data ).ToList ( ).Count;
+			var common = v.DucReferences.data.Intersect ( DucReferences.data ).ToList ( ).Count;
 			result += ( 1m * common ) / ( totalReferences );
 		}
 		if ( totalAssignments == 0 || totalReferences == 0 )
@@ -124,21 +124,21 @@ public class GVar
 		return result;
 	}
 
-	public decimal map ( List<GVar> vars )
+	public decimal Map ( List<GVar> vars )
 	{
-		var unionAssignments = new HashSet<DefineUseChain.DefineUseChainEntry> ( vars.SelectMany ( v => v.ducAssignments.data ) );
-		var unionRefereces = new HashSet<DefineUseChain.DefineUseChainEntry> ( vars.SelectMany ( v => v.ducReferences.data ) );
-		int totalAssignments = unionAssignments.Count + ducAssignments.data.Count;
-		int totalReferences = unionRefereces.Count + ducReferences.data.Count;
+		var unionAssignments = new HashSet<DefineUseChain.DefineUseChainEntry> ( vars.SelectMany ( v => v.DucAssignments.data ) );
+		var unionRefereces = new HashSet<DefineUseChain.DefineUseChainEntry> ( vars.SelectMany ( v => v.DucReferences.data ) );
+		int totalAssignments = unionAssignments.Count + DucAssignments.data.Count;
+		int totalReferences = unionRefereces.Count + DucReferences.data.Count;
 		decimal result = 0m;
 		if ( totalAssignments != 0 )
 		{
-			var common = unionAssignments.Intersect ( ducAssignments.data ).ToList ( ).Count;
+			var common = unionAssignments.Intersect ( DucAssignments.data ).ToList ( ).Count;
 			result += ( 1m * common ) / ( totalAssignments );
 		}
 		if ( totalReferences != 0 )
 		{
-			var common = unionRefereces.Intersect ( ducReferences.data ).ToList ( ).Count;
+			var common = unionRefereces.Intersect ( DucReferences.data ).ToList ( ).Count;
 			result += ( 1m * common ) / ( totalReferences );
 		}
 		if ( totalAssignments == 0 || totalReferences == 0 )
@@ -148,57 +148,57 @@ public class GVar
 
 	public static bool operator == ( GVar lhs, GVar rhs )
 	{
-		return lhs.name == rhs.name;
+		return lhs.Name == rhs.Name;
 	}
 
 	public static bool operator != ( GVar lhs, GVar rhs )
 	{
-		return lhs.name != rhs.name;
+		return lhs.Name != rhs.Name;
 	}
 
 	public override bool Equals ( object obj )
 	{
 		if ( obj is GVar )
-			return ( obj as GVar ).name == name;
+			return ( obj as GVar ).Name == Name;
 		return base.Equals ( obj );
 	}
 
 	public override int GetHashCode ( )
 	{
-		return name.GetHashCode ( );
+		return Name.GetHashCode ( );
 	}
 
 	public override string ToString ( )
 	{
-		return $"{type} {name}";
+		return $"{Type} {Name}";
 	}
 }
 
 public class GArrayDereference : GVar
 {
-	public string offset { get; set; }
+	public string Offset { get; set; }
 
 	public GArrayDereference ( string str )
 	{
 		string pattern = @"MEM\[base: (?<name>[\w\.]+), offset: (?<offset>\w+)]";
 		var match = Regex.Match ( str, pattern );
-		name = match.Groups["name"].Value;
-		offset = match.Groups["offset"].Value;
+		Name = match.Groups["name"].Value;
+		Offset = match.Groups["offset"].Value;
 	}
 
-	public static bool matches ( string str )
+	public static bool Matches ( string str )
 	{
 		return Regex.IsMatch ( str, @"^MEM\[base: (?<name>[\w\.]+), offset: (?<offset>\w+)]$" );
 	}
 
 	public override int GetHashCode ( )
 	{
-		return name.GetHashCode ( );
+		return Name.GetHashCode ( );
 	}
 
 	public override string ToString ( )
 	{
-		return $"MEM[base: {name}, offset: {offset}]";
+		return $"MEM[base: {Name}, offset: {Offset}]";
 	}
 }
 

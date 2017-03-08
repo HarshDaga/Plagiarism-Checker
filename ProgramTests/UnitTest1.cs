@@ -8,7 +8,7 @@ namespace ProgramTests
 	[TestClass]
 	public class UnitTest1
 	{
-		public static GFunction getGFunction ( string fileName )
+		public static GFunction GetGFunction ( string fileName )
 		{
 			var optimizer = new Optimizer ( fileName );
 			optimizer.Run ( );
@@ -22,8 +22,8 @@ namespace ProgramTests
 		[TestMethod]
 		public void ExactSame ( )
 		{
-			GFunction fact = getGFunction ( "fib.c" );
-			GFunction fib_same = getGFunction ( "fib same.c" );
+			GFunction fact = GetGFunction ( "fib.c" );
+			GFunction fib_same = GetGFunction ( "fib same.c" );
 
 			Assert.IsTrue ( fact == fib_same );
 		}
@@ -31,8 +31,8 @@ namespace ProgramTests
 		[TestMethod]
 		public void CommentsAndIndentation ( )
 		{
-			GFunction fib = getGFunction ( "fib.c" );
-			GFunction fib_comments_indent = getGFunction ( "fib comments and indentation.c" );
+			GFunction fib = GetGFunction ( "fib.c" );
+			GFunction fib_comments_indent = GetGFunction ( "fib comments and indentation.c" );
 
 			Assert.IsTrue ( fib == fib_comments_indent );
 		}
@@ -40,8 +40,8 @@ namespace ProgramTests
 		[TestMethod]
 		public void Macros ( )
 		{
-			GFunction fib = getGFunction ( "fib.c" );
-			GFunction fib_macro = getGFunction ( "fib macro.c" );
+			GFunction fib = GetGFunction ( "fib.c" );
+			GFunction fib_macro = GetGFunction ( "fib macro.c" );
 
 			Assert.IsTrue ( fib == fib_macro );
 		}
@@ -49,8 +49,8 @@ namespace ProgramTests
 		[TestMethod]
 		public void SingularDecl ( )
 		{
-			GFunction fib = getGFunction ( "fib.c" );
-			GFunction fib_singular_decl = getGFunction ( "fib singular decl.c" );
+			GFunction fib = GetGFunction ( "fib.c" );
+			GFunction fib_singular_decl = GetGFunction ( "fib singular decl.c" );
 
 			Assert.IsTrue ( fib == fib_singular_decl );
 		}
@@ -58,8 +58,8 @@ namespace ProgramTests
 		[TestMethod]
 		public void RedundantExpressions ( )
 		{
-			GFunction fib = getGFunction ( "fib.c" );
-			GFunction fib_redundant_expr = getGFunction ( "fib redundant expressions.c" );
+			GFunction fib = GetGFunction ( "fib.c" );
+			GFunction fib_redundant_expr = GetGFunction ( "fib redundant expressions.c" );
 
 			Assert.IsTrue ( fib == fib_redundant_expr );
 		}
@@ -67,8 +67,8 @@ namespace ProgramTests
 		[TestMethod]
 		public void RedundantVar ( )
 		{
-			GFunction fib = getGFunction ( "fib.c" );
-			GFunction fib_redundant_var = getGFunction ( "fib redundant var.c" );
+			GFunction fib = GetGFunction ( "fib.c" );
+			GFunction fib_redundant_var = GetGFunction ( "fib redundant var.c" );
 
 			Assert.IsTrue ( fib == fib_redundant_var );
 		}
@@ -76,8 +76,8 @@ namespace ProgramTests
 		[TestMethod]
 		public void Datatype ( )
 		{
-			GFunction fib = getGFunction ( "fib.c" );
-			GFunction fib_datatype = getGFunction ( "fib datatype.c" );
+			GFunction fib = GetGFunction ( "fib.c" );
+			GFunction fib_datatype = GetGFunction ( "fib datatype.c" );
 
 			Assert.IsTrue ( fib_datatype == fib );
 		}
@@ -85,8 +85,8 @@ namespace ProgramTests
 		[TestMethod]
 		public void LoopReversal ( )
 		{
-			GFunction fib = getGFunction ( "fib.c" );
-			GFunction fib_loop_rev = getGFunction ( "fib loop reversed.c" );
+			GFunction fib = GetGFunction ( "fib.c" );
+			GFunction fib_loop_rev = GetGFunction ( "fib loop reversed.c" );
 
 			Assert.IsTrue ( fib == fib_loop_rev );
 		}
@@ -94,8 +94,8 @@ namespace ProgramTests
 		[TestMethod]
 		public void ConditionReversed ( )
 		{
-			GFunction max = getGFunction ( "max.c" );
-			GFunction max_cond_rev = getGFunction ( "max condition rev.c" );
+			GFunction max = GetGFunction ( "max.c" );
+			GFunction max_cond_rev = GetGFunction ( "max condition rev.c" );
 
 			Assert.IsTrue ( max == max_cond_rev );
 		}
@@ -103,8 +103,8 @@ namespace ProgramTests
 		[TestMethod]
 		public void Refactored ( )
 		{
-			GFunction fib = getGFunction ( "fib.c" );
-			GFunction fib_refactored = getGFunction ( "fib refactored.c" );
+			GFunction fib = GetGFunction ( "fib.c" );
+			GFunction fib_refactored = GetGFunction ( "fib refactored.c" );
 
 			Assert.IsTrue ( fib == fib_refactored );
 		}
@@ -112,8 +112,8 @@ namespace ProgramTests
 		[TestMethod]
 		public void VarRenamed ( )
 		{
-			GFunction fib = getGFunction ( "fib.c" );
-			GFunction fib_refactored = getGFunction ( "fib var renamed.c" );
+			GFunction fib = GetGFunction ( "fib.c" );
+			GFunction fib_refactored = GetGFunction ( "fib var renamed.c" );
 
 			Assert.IsTrue ( fib == fib_refactored );
 		}
