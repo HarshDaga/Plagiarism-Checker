@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -11,56 +10,6 @@ using System.Text.RegularExpressions;
 
 namespace GCC_Optimizer
 {
-	/// <summary>
-	/// Result of <see cref="Optimizer.Optimizer(string)"/>
-	/// </summary>
-	public enum OptimizeResult
-	{
-		None,
-		Success,
-		FileNotFound,
-		BadExtension,
-		CompileError
-	}
-
-	/// <summary>
-	/// Supported 'dot' output formats.
-	/// </summary>
-	public enum DotOutputFormat
-	{
-		[Description ( "bmp" )]
-		bmp,
-
-		[Description ( "gif" )]
-		gif,
-
-		[Description ( "ico" )]
-		ico,
-
-		[Description ( "jpg" )]
-		jpg,
-
-		[Description ( "pdf" )]
-		pdf,
-
-		[Description ( "plain" )]
-		plain,
-
-		[Description ( "png" )]
-		png,
-
-		[Description ( "ps" )]
-		ps,
-
-		[Description ( "svg" )]
-		svg,
-
-		[Description ( "tga" )]
-		tga,
-
-		[Description ( "vml" )]
-		vml
-	}
 
 	/// <summary>
 	/// Handles all GCC and dot related activities.
