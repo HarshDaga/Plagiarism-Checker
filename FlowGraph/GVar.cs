@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.RegularExpressions;
 
 #pragma warning disable CS1591
 
@@ -173,84 +172,3 @@ public class GVar
 		return $"{Type} {Name}";
 	}
 }
-
-public class GArrayDereference : GVar
-{
-	public string Offset { get; set; }
-
-	public GArrayDereference ( string str )
-	{
-		string pattern = @"MEM\[base: (?<name>[\w\.]+), offset: (?<offset>\w+)]";
-		var match = Regex.Match ( str, pattern );
-		Name = match.Groups["name"].Value;
-		Offset = match.Groups["offset"].Value;
-	}
-
-	public static bool Matches ( string str )
-	{
-		return Regex.IsMatch ( str, @"^MEM\[base: (?<name>[\w\.]+), offset: (?<offset>\w+)]$" );
-	}
-
-	public override int GetHashCode ( )
-	{
-		return Name.GetHashCode ( );
-	}
-
-	public override string ToString ( )
-	{
-		return $"MEM[base: {Name}, offset: {Offset}]";
-	}
-}
-
-//public class GValue
-//{
-//    public bool isVar { get; set; }
-//    public bool isConstant
-//    {
-//        get
-//        {
-//            return !isVar;
-//        }
-//        set
-//        {
-//            isVar = !value;
-//        }
-//    }
-//    public object Value
-//    {
-//        get
-//        {
-//            if ( isVar )
-//                return gVar;
-//            else
-//                return gConst;
-//        }
-//        private set
-//        {
-//            if ( value is GVar )
-//            {
-//                isVar = true;
-//                gVar = value as GVar;
-//            }
-//            else
-//            {
-//                isVar = false;
-//                gConst = value;
-//            }
-//        }
-//    }
-//    GVar gVar;
-//    object gConst;
-
-//    public GValue ( GVar gVar )
-//    {
-//        Value = gVar;
-//        gConst = null;
-//    }
-
-//    public GValue ( string gConst )
-//    {
-//        Value = gConst;
-//        gVar = null;
-//    }
-//}

@@ -59,9 +59,23 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="GArrayDereference.cs" />
+    <Compile Include="GimpleStmtTypes\GAssignStmt.cs" />
     <Compile Include="GBaseBlock.cs" />
+    <Compile Include="GimpleStmtTypes\GBBStmt.cs" />
+    <Compile Include="GimpleStmtTypes\GCallStmt.cs" />
+    <Compile Include="GimpleStmtTypes\GCastStmt.cs" />
+    <Compile Include="GimpleStmtTypes\GCondStmt.cs" />
+    <Compile Include="GimpleStmtTypes\GElseStmt.cs" />
     <Compile Include="GFunction.cs" />
+    <Compile Include="GimpleStmtTypes\GGotoStmt.cs" />
     <Compile Include="GimpleStmt.cs" />
+    <Compile Include="GimpleStmtType.cs" />
+    <Compile Include="GimpleStmtTypes\GLabelStmt.cs" />
+    <Compile Include="GimpleStmtTypes\GOptimizedStmt.cs" />
+    <Compile Include="GimpleStmtTypes\GPhiStmt.cs" />
+    <Compile Include="GimpleStmtTypes\GReturnStmt.cs" />
+    <Compile Include="GimpleStmtTypes\GSwitchStmt.cs" />
     <Compile Include="GVar.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

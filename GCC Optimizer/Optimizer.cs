@@ -96,7 +96,7 @@ namespace GCC_Optimizer
 				};
 			public static readonly bool SuppressOutput = true;
 			public static readonly bool Rebuild = true;
-			public static OptimizeResult LastError = OptimizeResult.None;
+			public static readonly OptimizeResult LastError = OptimizeResult.None;
 		}
 
 		public string FileName { get; private set; }
@@ -327,6 +327,8 @@ namespace GCC_Optimizer
 		/// <returns><see cref="Tuple{STDOUT, STDERR}"/>.</returns>
 		public Tuple<string, string> ExecCmd ( string cmd )
 		{
+			if ( BatchFile.EndsWith ( ".bat" ) )
+				BatchFile = BatchFile + ".bat";
 			var fileStream = File.Create ( BatchFile );
 			var byteArray = Encoding.ASCII.GetBytes ( cmd );
 			fileStream.Write ( byteArray, 0, byteArray.Length );
