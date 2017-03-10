@@ -1,0 +1,299 @@
+﻿<Controls:MetroWindow
+	x:Class="GUI.MainWindow"
+	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+	xmlns:Converters="http://metro.mahapps.com/winfx/xaml/shared"
+	xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+	xmlns:dragDrop="clr-namespace:GongSolutions.Wpf.DragDrop;assembly=GongSolutions.Wpf.DragDrop"
+	xmlns:gui="clr-namespace:GUI"
+	xmlns:ignore="http://www.galasoft.ch/ignore"
+	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+	xmlns:metro="clr-namespace:MahApps.Metro;assembly=MahApps.Metro"
+	xmlns:metroIcons="http://metro.mahapps.com/winfx/xaml/iconpacks"
+	x:Name="mainWindow"
+	Title="Can't fool me!"
+	Width="1280"
+	Height="720"
+	DataContext="{Binding Main, Source={StaticResource Locator}}"
+	GlowBrush="{DynamicResource AccentColorBrush}"
+	Icon="icon.ico"
+	RenderOptions.ClearTypeHint="Enabled"
+	ShowIconOnTitleBar="True"
+	TextOptions.TextFormattingMode="Display"
+	TitleAlignment="Center"
+	WindowStartupLocation="CenterScreen"
+	mc:Ignorable="d ignore">
+
+	<Controls:MetroWindow.Triggers>
+		<EventTrigger RoutedEvent="FrameworkElement.Loaded" />
+	</Controls:MetroWindow.Triggers>
+
+	<Controls:MetroWindow.NonActiveGlowBrush>
+		<LinearGradientBrush StartPoint="0.5,0" EndPoint="0.5,1">
+			<GradientStop Offset="0" Color="Gray" />
+			<GradientStop Offset="1" Color="#FFC3C3C3" />
+		</LinearGradientBrush>
+	</Controls:MetroWindow.NonActiveGlowBrush>
+
+	<!--  Title Bar Buttons  -->
+	<Controls:MetroWindow.LeftWindowCommands>
+		<Controls:WindowCommands>
+			<Button x:Name="btSettings" Click="btSettings_Click">
+				<metroIcons:PackIconModern Kind="Settings" />
+			</Button>
+		</Controls:WindowCommands>
+	</Controls:MetroWindow.LeftWindowCommands>
+	<Controls:MetroWindow.RightWindowCommands>
+		<Controls:WindowCommands>
+			<ComboBox
+				x:Name="cbAccent"
+				Width="80"
+				MinWidth="80"
+				Margin="0,0,0,0"
+				Background="{x:Null}"
+				BorderThickness="0"
+				ItemsSource="{x:Static metro:ThemeManager.Accents}"
+				SelectionChanged="cbAccent_SelectionChanged">
+				<ComboBox.ItemTemplate>
+					<DataTemplate>
+						<TextBlock Text="{Binding Name}" />
+					</DataTemplate>
+				</ComboBox.ItemTemplate>
+			</ComboBox>
+			<ToggleButton
+				x:Name="tbtTheme"
+				Click="tbtTheme_Click"
+				IsChecked="True">
+				<metroIcons:PackIconModern Kind="ImageBacklight" />
+			</ToggleButton>
+		</Controls:WindowCommands>
+	</Controls:MetroWindow.RightWindowCommands>
+
+	<Grid x:Name="LayoutRoot">
+		<Controls:MetroAnimatedSingleRowTabControl
+			Margin="0,10,0,0"
+			HorizontalAlignment="Center"
+			HorizontalContentAlignment="Center">
+			<TabControl.Resources>
+				<Style TargetType="{x:Type TabPanel}">
+					<Setter Property="HorizontalAlignment" Value="Center" />
+				</Style>
+			</TabControl.Resources>
+			<TabItem
+				x:Name="tabItemAddFiles"
+				Padding="24,2"
+				HorizontalAlignment="Center"
+				Header="Add Files">
+				<Grid
+					x:Name="gridAddFiles"
+					Width="{Binding ActualWidth, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type gui:MainWindow}}}"
+					Margin="0,0,10,15">
+					<ListView
+						x:Name="listViewFiles"
+						Margin="275,120,275,120"
+						dragDrop:DragDrop.DropHandler="{Binding}"
+						dragDrop:DragDrop.IsDropTarget="True"
+						BorderBrush="{DynamicResource AccentColorBrush}"
+						BorderThickness="2"
+						IsSynchronizedWithCurrentItem="True"
+						IsTabStop="True"
+						ItemsSource="{Binding Files}"
+						SizeChanged="listViewFiles_SizeChanged">
+						<ListView.ItemContainerStyle>
+							<Style BasedOn="{StaticResource {x:Type ListViewItem}}" TargetType="{x:Type ListViewItem}">
+								<Setter Property="IsSelected" Value="{Binding Mode=TwoWay, Path=IsSelected}" />
+							</Style>
+						</ListView.ItemContainerStyle>
+						<ListView.View>
+							<GridView AllowsColumnReorder="False">
+								<GridView.Columns>
+									<GridViewColumn Header="Selected">
+										<GridViewColumn.CellTemplate>
+											<DataTemplate>
+												<CheckBox HorizontalAlignment="Center" IsChecked="{Binding IsChecked}" />
+											</DataTemplate>
+										</GridViewColumn.CellTemplate>
+									</GridViewColumn>
+									<GridViewColumn
+										Width="Auto"
+										DisplayMemberBinding="{Binding FileName}"
+										Header="File Name" />
+									<GridViewColumn DisplayMemberBinding="{Binding Status}" Header="Status" />
+								</GridView.Columns>
+							</GridView>
+						</ListView.View>
+					</ListView>
+					<Grid
+						Height="38.4"
+						Margin="275,0,275,50"
+						VerticalAlignment="Bottom">
+						<Grid.ColumnDefinitions>
+							<ColumnDefinition Width="83*" />
+							<ColumnDefinition Width="83*" />
+							<ColumnDefinition Width="83*" />
+						</Grid.ColumnDefinitions>
+						<Button
+							x:Name="btDelete"
+							Grid.Column="1"
+							Margin="6,0,10,0"
+							VerticalAlignment="Top"
+							Command="{Binding DeleteFileCommand}"
+							Content="Delete" />
+						<Button
+							x:Name="btAdd"
+							Margin="5.6,0,10,0"
+							VerticalAlignment="Top"
+							Command="{Binding AddFileCommand}"
+							Content="Add" />
+						<Button
+							x:Name="btCompare"
+							Grid.Column="2"
+							Margin="6,0,10,0"
+							VerticalAlignment="Top"
+							Command="{Binding CompareFileCommand}"
+							Content="Compare" />
+					</Grid>
+				</Grid>
+			</TabItem>
+			<TabItem
+				x:Name="tabItemResults"
+				Padding="24,2"
+				HorizontalAlignment="Center"
+				Header="Comparison Results">
+				<Grid
+					x:Name="gridResults"
+					Width="{Binding ActualWidth, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type gui:MainWindow}}}"
+					Margin="0,0,10,15">
+					<ListView
+						x:Name="listViewResults"
+						Margin="275,120,275,120"
+						dragDrop:DragDrop.DropHandler="{Binding}"
+						dragDrop:DragDrop.IsDropTarget="True"
+						BorderBrush="{DynamicResource AccentColorBrush}"
+						BorderThickness="1"
+						IsSynchronizedWithCurrentItem="True"
+						IsTabStop="True"
+						ItemsSource="{Binding Results}"
+						SizeChanged="listViewResults_SizeChanged">
+						<ListView.View>
+							<GridView AllowsColumnReorder="False">
+								<GridView.Columns>
+									<GridViewColumn
+										Width="Auto"
+										DisplayMemberBinding="{Binding File1}"
+										Header="File 1" />
+									<GridViewColumn
+										Width="Auto"
+										DisplayMemberBinding="{Binding File2}"
+										Header="File 2" />
+									<GridViewColumn DisplayMemberBinding="{Binding StrPercentage}" Header="Similarity" />
+								</GridView.Columns>
+							</GridView>
+						</ListView.View>
+					</ListView>
+				</Grid>
+			</TabItem>
+		</Controls:MetroAnimatedSingleRowTabControl>
+
+		<Controls:Flyout
+			x:Name="flySettings"
+			Width="337"
+			Margin="0,0,0,0"
+			VerticalAlignment="Stretch"
+			d:IsHidden="True"
+			BorderBrush="{DynamicResource AccentColorBrush}"
+			IsPinned="False">
+			<Grid x:Name="gridSettings" Margin="0,0,10,50">
+				<Label
+					x:Name="lblRebuild"
+					Width="123"
+					Height="35"
+					Margin="10,20,0,0"
+					HorizontalAlignment="Left"
+					VerticalAlignment="Top"
+					HorizontalContentAlignment="Right"
+					Content="Rebuild files:" />
+				<Controls:ToggleSwitchButton
+					x:Name="tglBtnRebuild"
+					Width="67"
+					Height="30"
+					Margin="138,20,0,0"
+					HorizontalAlignment="Left"
+					VerticalAlignment="Top"
+					IsChecked="{Binding Rebuild}" />
+				<Label
+					x:Name="lblBatchFile"
+					Width="123"
+					Height="35"
+					Margin="10,55,0,0"
+					HorizontalAlignment="Left"
+					VerticalAlignment="Top"
+					HorizontalContentAlignment="Right"
+					Content="Temporary Batch File:" />
+				<TextBox
+					x:Name="tbBatchFile"
+					Width="160"
+					Height="35"
+					Margin="138,55,0,0"
+					HorizontalAlignment="Left"
+					VerticalAlignment="Top"
+					VerticalContentAlignment="Center"
+					MaxLines="1"
+					Text="{Binding BatchFile}" />
+				<gui:StringListBox
+					x:Name="slBoxGccFlags"
+					Title="GCC Compilation Flags"
+					Width="288"
+					Height="155"
+					Margin="10,100,0,0"
+					HorizontalAlignment="Center"
+					VerticalAlignment="Top"
+					HorizontalContentAlignment="Left"
+					BorderBrush="{DynamicResource AccentColorBrush}"
+					ItemsSource="{Binding GccFlags, Mode=TwoWay}" />
+				<gui:StringListBox
+					x:Name="slBoxSuffixes"
+					Title="Suffixes To Check"
+					Width="288"
+					Height="110"
+					Margin="10,260,0,0"
+					HorizontalAlignment="Center"
+					VerticalAlignment="Top"
+					HorizontalContentAlignment="Left"
+					BorderBrush="{DynamicResource AccentColorBrush}"
+					ItemsSource="{Binding Suffixes, Mode=TwoWay}" />
+				<ListView
+					x:Name="listViewDotOutputFormats"
+					Width="288"
+					Height="150"
+					Margin="10,390,0,0"
+					dragDrop:DragDrop.DropHandler="{Binding}"
+					dragDrop:DragDrop.IsDropTarget="True"
+					BorderBrush="{DynamicResource AccentColorBrush}"
+					BorderThickness="1"
+					IsSynchronizedWithCurrentItem="True"
+					IsTabStop="True"
+					ItemsSource="{Binding DotOutputFormats}">
+					<ListView.View>
+						<GridView AllowsColumnReorder="False">
+							<GridView.Columns>
+								<GridViewColumn Width="Auto" Header="Selected">
+									<GridViewColumn.CellTemplate>
+										<DataTemplate>
+											<CheckBox HorizontalAlignment="Center" IsChecked="{Binding IsChecked}" />
+										</DataTemplate>
+									</GridViewColumn.CellTemplate>
+								</GridViewColumn>
+								<GridViewColumn
+									Width="Auto"
+									DisplayMemberBinding="{Binding Name}"
+									Header="Format" />
+							</GridView.Columns>
+						</GridView>
+					</ListView.View>
+				</ListView>
+			</Grid>
+		</Controls:Flyout>
+	</Grid>
+</Controls:MetroWindow>

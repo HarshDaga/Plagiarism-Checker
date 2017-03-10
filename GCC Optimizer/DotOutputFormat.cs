@@ -9,14 +9,8 @@ namespace GCC_Optimizer
 	/// </summary>
 	public enum DotOutputFormat
 	{
-		[Description ( "bmp" )]
-		bmp,
-
-		[Description ( "gif" )]
-		gif,
-
-		[Description ( "ico" )]
-		ico,
+		[Description ( "png" )]
+		png,
 
 		[Description ( "jpg" )]
 		jpg,
@@ -27,14 +21,20 @@ namespace GCC_Optimizer
 		[Description ( "plain" )]
 		plain,
 
-		[Description ( "png" )]
-		png,
+		[Description ( "svg" )]
+		svg,
+
+		[Description ( "bmp" )]
+		bmp,
+
+		[Description ( "gif" )]
+		gif,
+
+		[Description ( "ico" )]
+		ico,
 
 		[Description ( "ps" )]
 		ps,
-
-		[Description ( "svg" )]
-		svg,
 
 		[Description ( "tga" )]
 		tga,
