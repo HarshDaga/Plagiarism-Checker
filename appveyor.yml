@@ -3,15 +3,22 @@ image: Visual Studio 2017
 configuration: Release
 platform: Any CPU
 shallow_clone: true
-install:
-  - set PATH=C:\Program Files (x86)\MSBuild\15.0\Bin;%PATH%
 environment:
   matrix:
   - solution_name: GCC Optimizer/GCC Optimizer.csproj
   - solution_name: FlowGraph/FlowGraph.csproj
   - solution_name: GUI/GUI.csproj
+install:
+- cmd: set PATH=C:\Program Files (x86)\MSBuild\15.0\Bin;%PATH%
+before_build:
+- cmd: nuget restore
 build:
   project: '%solution_name%'
   publish_nuget: true
   include_nuget_references: true
   verbosity: minimal
+before_test:
+- cmd: >-
+    if "%TARGET%" == "i686-pc-windows-gnu" set PATH=%PATH%;C:\msys64\mingw32\bin
+
+    if "%TARGET%" == "x86_64-pc-windows-gnu" set PATH=%PATH%;C:\msys64\mingw64\bin
