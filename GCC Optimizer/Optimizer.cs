@@ -72,13 +72,13 @@ namespace GCC_Optimizer
 				//throw new FileNotFoundException ( $"{fileName} couldn't be found." );
 			}
 
-			if ( Path.IsPathRooted ( fileName ) )
+			if ( Path.IsPathRooted ( fileName ) && !fileName.StartsWith ( Directory.GetCurrentDirectory ( ) ) )
 			{
 				this.FileName = Path.GetFileName ( fileName );
 				File.Copy ( fileName, this.FileName, true );
 			}
 			else
-				this.FileName = fileName;
+				this.FileName = Path.GetFileName ( fileName );
 
 			if ( BatchFile == null )
 				BatchFile = Defaults.BatchFile;
