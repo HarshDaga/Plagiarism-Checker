@@ -72,13 +72,10 @@ namespace GCC_Optimizer
 				//throw new FileNotFoundException ( $"{fileName} couldn't be found." );
 			}
 
-			if ( Path.IsPathRooted ( fileName ) && !fileName.StartsWith ( Directory.GetCurrentDirectory ( ) ) )
-			{
-				this.FileName = Path.GetFileName ( fileName );
+			this.FileName = Path.GetFileName ( fileName );
+			if ( Path.IsPathRooted ( fileName ) &&
+				!fileName.StartsWith ( Directory.GetCurrentDirectory ( ) ) )
 				File.Copy ( fileName, this.FileName, true );
-			}
-			else
-				this.FileName = Path.GetFileName ( fileName );
 
 			if ( BatchFile == null )
 				BatchFile = Defaults.BatchFile;
@@ -197,9 +194,9 @@ namespace GCC_Optimizer
 			{
 				cmd = $"gcc {string.Join ( " ", GccFlags )} \"" + FileName + "\"\n";
 				var results = ExecCmd ( cmd );
-				Stdout += results.Item1;
-				Stderr += results.Item2;
-				if ( results.Item2.Length > 0 )
+				Stdout += results.stdout;
+				Stderr += results.stderr;
+				if ( results.stderr.Length > 0 )
 				{
 					LastError = OptimizeResult.CompileError;                             // Compilation Error
 					return false;
@@ -241,8 +238,8 @@ namespace GCC_Optimizer
 			{
 				cmd = $"dot -T{format} -O \"{prefix}\\{optimizedDot}\"";
 				var results = ExecCmd ( cmd );
-				Stdout += results.Item1;
-				Stderr += results.Item2;
+				Stdout += results.stdout;
+				Stderr += results.stderr;
 				DotOutputs.Add ( $"{optimizedDot}.{format}" );
 			}
 
@@ -273,8 +270,8 @@ namespace GCC_Optimizer
 		/// </para>
 		/// </summary>
 		/// <param name="cmd"></param>
-		/// <returns><see cref="Tuple{STDOUT, STDERR}"/>.</returns>
-		public Tuple<string, string> ExecCmd ( string cmd )
+		/// <returns>A ValueTuple of (<see cref="string"/> stdout, <see cref="string"/> stderr).</returns>
+		public (string stdout, string stderr) ExecCmd ( string cmd )
 		{
 			if ( BatchFile.EndsWith ( ".bat" ) )
 				BatchFile = BatchFile + ".bat";
@@ -289,6 +286,8 @@ namespace GCC_Optimizer
 			p.StartInfo.RedirectStandardOutput = true;
 			p.StartInfo.RedirectStandardError = true;
 			p.StartInfo.FileName = BatchFile;
+			p.StartInfo.CreateNoWindow = true;
+			p.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
 			p.Start ( );
 			// Do not wait for the child process to exit before
 			// reading to the end of its redirected stream.
@@ -305,7 +304,7 @@ namespace GCC_Optimizer
 
 			File.Delete ( BatchFile );
 
-			return new Tuple<string, string> ( output, error );
+			return ( output, error );
 		}
 
 	}

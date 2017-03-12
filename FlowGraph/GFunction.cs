@@ -162,7 +162,6 @@ namespace FlowGraph
 				};
 				GVarsDecl.Add ( gVar );
 			}
-
 		}
 
 		private void GetVarsUsed ( )
@@ -355,7 +354,7 @@ namespace FlowGraph
 		public static bool operator == ( GFunction lhs, GFunction rhs )
 		{
 			if ( object.ReferenceEquals ( rhs, null ) )
-				return ( object.ReferenceEquals ( lhs, null ) );
+				return object.ReferenceEquals ( lhs, null );
 			else if ( object.ReferenceEquals ( lhs, null ) )
 				return false;
 
@@ -448,11 +447,6 @@ namespace FlowGraph
 					}
 				}
 			}
-
-			//foreach ( var v1 in gVarsDecl )
-			//	foreach ( var v2 in gFunc.gVarsDecl )
-			//		if ( v1.map ( v2 ) == 1m )
-			//			varMap[v1] = v2;
 
 			return varMap;
 		}

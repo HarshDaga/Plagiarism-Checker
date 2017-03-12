@@ -80,7 +80,6 @@
     <Compile Include="GimpleStmtTypes\GReturnStmt.cs" />
     <Compile Include="GimpleStmtTypes\GSwitchStmt.cs" />
     <Compile Include="GVar.cs" />
-    <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
