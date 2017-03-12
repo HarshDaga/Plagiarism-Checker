@@ -18,19 +18,19 @@ namespace GUI.Model
 		public string FileName
 		{
 			get => Path.GetFileName ( _fileName );
-			private set => Set ( "fileName", ref _fileName, value );
+			private set => Set ( nameof ( FileName ), ref _fileName, value );
 		}
 
 		public bool IsChecked
 		{
 			get => _isChecked;
-			set => Set ( "isChecked", ref _isChecked, value );
+			set => Set ( nameof ( IsChecked ), ref _isChecked, value );
 		}
 
 		public bool IsSelected
 		{
 			get => _isSelected;
-			set => Set ( "isSelected", ref _isSelected, value );
+			set => Set ( nameof ( IsSelected ), ref _isSelected, value );
 		}
 
 		public bool IsFaulty =>
@@ -85,7 +85,7 @@ namespace GUI.Model
 				InitOptimizer ( );
 			if ( !IsFaulty )
 				gFunc = new GFunction ( optimizer.GIMPLE, FileName );
-			RaisePropertyChanged ( "status" );
+			RaisePropertyChanged ( nameof ( Status ) );
 		}
 	}
 }

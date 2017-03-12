@@ -10,7 +10,7 @@ namespace GUI.Model
 		public DotOutputFormat Format
 		{
 			get => format;
-			set => Set ( "Format", ref format, value );
+			set => Set ( nameof ( Format ), ref format, value );
 		}
 
 		public string Name => format.ToString ( );
@@ -25,7 +25,7 @@ namespace GUI.Model
 				else if ( !value )
 					OptimizerSettings.Instance.DotOutputFormats.Remove ( format );
 				OptimizerSettings.Save ( );
-				RaisePropertyChanged ( "IsChecked" );
+				RaisePropertyChanged ( nameof ( IsChecked ) );
 			}
 		}
 

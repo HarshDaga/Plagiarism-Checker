@@ -29,7 +29,7 @@ namespace GUI.ViewModel
 			set
 			{
 				OptimizerSettings.Instance.BatchFile = value;
-				RaisePropertyChanged ( "BatchFile" );
+				RaisePropertyChanged ( nameof ( BatchFile ) );
 			}
 		}
 		public ObservableCollection<string> GccFlags
@@ -38,7 +38,7 @@ namespace GUI.ViewModel
 			set
 			{
 				OptimizerSettings.Instance.GccFlags = value;
-				RaisePropertyChanged ( "GccFlags" );
+				RaisePropertyChanged ( nameof ( GccFlags ) );
 			}
 		}
 		public ObservableCollection<string> Suffixes
@@ -47,13 +47,13 @@ namespace GUI.ViewModel
 			set
 			{
 				OptimizerSettings.Instance.Suffixes = value;
-				RaisePropertyChanged ( "Suffixes" );
+				RaisePropertyChanged ( nameof ( Suffixes ) );
 			}
 		}
 		public ObservableCollection<DotOutputFormatItem> DotOutputFormats
 		{
 			get => dotOutputFormats;
-			set => Set ( "DotOutputFormats", ref dotOutputFormats, value );
+			set => Set ( nameof ( DotOutputFormats ), ref dotOutputFormats, value );
 		}
 		public bool Rebuild
 		{
@@ -61,7 +61,7 @@ namespace GUI.ViewModel
 			set
 			{
 				OptimizerSettings.Instance.Rebuild = value;
-				OptimizerSettings.Save ( );
+				RaisePropertyChanged ( nameof ( Rebuild ) );
 			}
 		}
 		#endregion
@@ -72,12 +72,12 @@ namespace GUI.ViewModel
 		public ObservableCollection<FileItem> Files
 		{
 			get => files;
-			set => Set ( "Files", ref files, value );
+			set => Set ( nameof ( Files ), ref files, value );
 		}
 		public ObservableCollection<ResultItem> Results
 		{
 			get => results;
-			set => Set ( "Results", ref results, value );
+			set => Set ( nameof ( Results ), ref results, value );
 		}
 
 		/// <summary>
@@ -109,7 +109,7 @@ namespace GUI.ViewModel
 
 		#region Button Commands
 
-		private bool CanCompareFile ( ) => Files.Count ( f => f.IsChecked && !f.IsFaulty ) > 1;
+		private bool CanCompareFile ( ) => Files.Count ( f => f.IsChecked && !f.IsFaulty ) > 0;
 
 		private void CompareFile ( )
 		{

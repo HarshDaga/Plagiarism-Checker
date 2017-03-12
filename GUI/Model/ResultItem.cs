@@ -15,17 +15,17 @@ namespace GUI.Model
 		public string File1
 		{
 			get => this.file1;
-			set => Set ( "File1", ref this.file1, value );
+			set => Set ( nameof ( File1 ), ref this.file1, value );
 		}
 		public string File2
 		{
 			get => this.file2;
-			set => Set ( "File2", ref this.file2, value );
+			set => Set ( nameof ( File2 ), ref this.file2, value );
 		}
 		public decimal Percentage
 		{
 			get => this.percentage;
-			set => Set ( "Percentage", ref this.percentage, value );
+			set => Set ( nameof ( Percentage ), ref this.percentage, value );
 		}
 		public string StrPercentage => $"{percentage}%";
 
