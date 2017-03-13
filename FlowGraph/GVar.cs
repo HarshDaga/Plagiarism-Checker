@@ -49,18 +49,67 @@ public class GVar
 			}
 		}
 
-		public HashSet<DefineUseChainEntry> data = new HashSet<DefineUseChainEntry> ( );
+		private HashSet<DefineUseChainEntry> data = new HashSet<DefineUseChainEntry> ( );
+
+		public HashSet<DefineUseChainEntry> Data { get => this.data; set => this.data = value; }
+		public int Count => Data.Count;
+
+		public DefineUseChain ( )
+		{
+		}
+
+		public DefineUseChain ( IEnumerable<DefineUseChain> ducs )
+		{
+			foreach ( var duc in ducs )
+				data.UnionWith ( duc.data );
+		}
 
 		public void Add ( int block, int line )
 		{
-			data.Add ( new DefineUseChainEntry ( block, line ) );
+			Data.Add ( new DefineUseChainEntry ( block, line ) );
 		}
+
+		public decimal Similarity ( DefineUseChain duc )
+		{
+			int totalAssignments = this.Count + duc.Count;
+			if ( totalAssignments == 0 )
+				return 0m;
+
+			var common = this.Intersect ( duc ).Count;
+			return ( 1m * common ) / ( totalAssignments );
+		}
+
+		public DefineUseChain Intersect ( DefineUseChain duc )
+		{
+			DefineUseChain result = new DefineUseChain
+			{
+				Data = new HashSet<DefineUseChainEntry> ( this.Data.Intersect ( duc.Data ) )
+			};
+			return result;
+		}
+
+		public DefineUseChain Union ( DefineUseChain duc )
+		{
+			DefineUseChain result = new DefineUseChain
+			{
+				Data = new HashSet<DefineUseChainEntry> ( this.Data.Union ( duc.Data ) )
+			};
+			return result;
+		}
+
+		public bool IsSubsetOf ( DefineUseChain duc ) => Data.IsSubsetOf ( duc.Data );
+
+		public bool IsProperSubsetOf ( DefineUseChain duc ) => Data.IsProperSubsetOf ( duc.Data );
+
+		public bool IsSupersetOf ( DefineUseChain duc ) => Data.IsSupersetOf ( duc.Data );
+
+		public bool IsProperSupersetOf ( DefineUseChain duc ) => Data.IsProperSupersetOf ( duc.Data );
 
 		public static bool operator == ( DefineUseChain lhs, DefineUseChain rhs )
 		{
-			if ( lhs.data.Count != rhs.data.Count )
+			if ( lhs.Data.Count != rhs.Data.Count )
 				return false;
-			return lhs.data.SetEquals ( rhs.data );
+			return lhs.Data.SetEquals ( rhs.Data );
 		}
 
 		public static bool operator != ( DefineUseChain lhs, DefineUseChain rhs )
@@ -82,7 +131,7 @@ public class GVar
 
 		public override string ToString ( )
 		{
-			return string.Join ( "\n", data );
+			return string.Join ( "\n", Data );
 		}
 
 	}
@@ -99,61 +148,33 @@ public class GVar
 
 	public bool IsSubsetOf ( GVar v )
 	{
-		return ( DucAssignments.data.IsSubsetOf ( v.DucAssignments.data ) &&
-			DucReferences.data.IsSubsetOf ( v.DucReferences.data ) );
+		return DucAssignments.IsSubsetOf ( v.DucAssignments ) &&
+			DucReferences.IsSubsetOf ( v.DucReferences );
 	}
 
-	public decimal Map ( GVar v )
-	{
-		decimal result = 0m;
-		int totalAssignments = v.DucAssignments.data.Count + DucAssignments.data.Count;
-		int totalReferences = v.DucReferences.data.Count + DucReferences.data.Count;
-		if ( totalAssignments != 0 )
-		{
-			var common = v.DucAssignments.data.Intersect ( DucAssignments.data ).ToList ( ).Count;
-			result += ( 1m * common ) / ( totalAssignments );
-		}
-		if ( totalReferences != 0 )
-		{
-			var common = v.DucReferences.data.Intersect ( DucReferences.data ).ToList ( ).Count;
-			result += ( 1m * common ) / ( totalReferences );
-		}
-		if ( totalAssignments == 0 || totalReferences == 0 )
-			result *= 2m;
-		return result;
-	}
+	public decimal Map ( GVar v ) => Map ( new List<GVar> { v } );
 
 	public decimal Map ( List<GVar> vars )
 	{
-		var unionAssignments = new HashSet<DefineUseChain.DefineUseChainEntry> ( vars.SelectMany ( v => v.DucAssignments.data ) );
-		var unionRefereces = new HashSet<DefineUseChain.DefineUseChainEntry> ( vars.SelectMany ( v => v.DucReferences.data ) );
-		int totalAssignments = unionAssignments.Count + DucAssignments.data.Count;
-		int totalReferences = unionRefereces.Count + DucReferences.data.Count;
+		var unionAssignments = new DefineUseChain ( vars.Select ( v => v.DucAssignments ) );
+		var unionRefereces = new DefineUseChain ( vars.Select ( v => v.DucReferences ) );
+		int totalAssignments = unionAssignments.Count + DucAssignments.Count;
+		int totalReferences = unionRefereces.Count + DucReferences.Count;
+
 		decimal result = 0m;
-		if ( totalAssignments != 0 )
-		{
-			var common = unionAssignments.Intersect ( DucAssignments.data ).ToList ( ).Count;
-			result += ( 1m * common ) / ( totalAssignments );
-		}
-		if ( totalReferences != 0 )
-		{
-			var common = unionRefereces.Intersect ( DucReferences.data ).ToList ( ).Count;
-			result += ( 1m * common ) / ( totalReferences );
-		}
+
+		result += unionAssignments.Similarity ( DucAssignments );
+		result += unionRefereces.Similarity ( DucReferences );
+
 		if ( totalAssignments == 0 || totalReferences == 0 )
 			result *= 2m;
+
 		return result;
 	}
 
-	public static bool operator == ( GVar lhs, GVar rhs )
-	{
-		return lhs.Name == rhs.Name;
-	}
+	public static bool operator == ( GVar lhs, GVar rhs ) => lhs.Name == rhs.Name;
 
-	public static bool operator != ( GVar lhs, GVar rhs )
-	{
-		return lhs.Name != rhs.Name;
-	}
+	public static bool operator != ( GVar lhs, GVar rhs ) => lhs.Name != rhs.Name;
 
 	public override bool Equals ( object obj )
 	{
@@ -162,13 +183,7 @@ public class GVar
 		return base.Equals ( obj );
 	}
 
-	public override int GetHashCode ( )
-	{
-		return Name.GetHashCode ( );
-	}
+	public override int GetHashCode ( ) => Name.GetHashCode ( );
 
-	public override string ToString ( )
-	{
-		return $"{Type} {Name}";
-	}
+	public override string ToString ( ) => $"{Type} {Name}";
 }
