@@ -8,8 +8,8 @@ namespace GUI.Model
 		{
 			// Use this to connect to the actual data service
 
-			var item = new FileItem ( "Welcome to MVVM Light" );
-			callback ( item, null );
+			//var item = new FileItem ( "Welcome to MVVM Light" );
+			//callback ( item, null );
 		}
 	}
 }

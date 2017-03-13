@@ -1,13 +1,13 @@
 ﻿using System.Windows;
-using GUI.ViewModel;
-using MahApps.Metro.Controls;
 using System.Windows.Controls;
+using GUI.ViewModel;
 using MahApps.Metro;
-using System.Windows.Media;
+using MahApps.Metro.Controls;
 
 namespace GUI
 {
 	using AppSettings = Properties.Settings;
+
 	/// <summary>
 	/// Interaction logic for MainWindow.xaml
 	/// </summary>
@@ -78,7 +78,7 @@ namespace GUI
 			ListView listView = sender as ListView;
 			GridView gView = listView.View as GridView;
 
-			var workingWidth = listView.ActualWidth - 35; // take into account vertical scrollbar
+			var workingWidth = listView.ActualWidth - 20; // take into account vertical scrollbar
 			var col1 = .42;
 			var col2 = .42;
 			var col3 = .16;

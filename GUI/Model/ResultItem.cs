@@ -17,16 +17,19 @@ namespace GUI.Model
 			get => this.file1;
 			set => Set ( nameof ( File1 ), ref this.file1, value );
 		}
+
 		public string File2
 		{
 			get => this.file2;
 			set => Set ( nameof ( File2 ), ref this.file2, value );
 		}
+
 		public decimal Percentage
 		{
 			get => this.percentage;
 			set => Set ( nameof ( Percentage ), ref this.percentage, value );
 		}
+
 		public string StrPercentage => $"{percentage}%";
 
 		public ResultItem ( GFunction lhs, GFunction rhs )

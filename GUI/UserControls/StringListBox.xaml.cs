@@ -1,18 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Collections.Specialized;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace GUI
 {
@@ -29,6 +19,7 @@ namespace GUI
 		}
 
 		#region Events
+
 		private void AddClicked ( object sender, RoutedEventArgs e )
 		{
 			ItemsSource.Add ( AddStringBox.Text );
@@ -61,9 +52,11 @@ namespace GUI
 				AddClicked ( this, e );
 			}
 		}
-		#endregion
+
+		#endregion Events
 
 		#region ItemsSource DependencyProperty
+
 		public ICollection<string> ItemsSource
 		{
 			get { return (ICollection<string>) GetValue ( ItemsSourceProperty ); }
@@ -72,9 +65,11 @@ namespace GUI
 
 		public static readonly DependencyProperty ItemsSourceProperty =
 			DependencyProperty.Register ( "ItemsSource", typeof ( ICollection<string> ), typeof ( StringListBox ), null );
-		#endregion
+
+		#endregion ItemsSource DependencyProperty
 
 		#region Title DependencyProperty
+
 		public string Title
 		{
 			get { return (string) GetValue ( TitleProperty ); }
@@ -83,6 +78,7 @@ namespace GUI
 
 		public static readonly DependencyProperty TitleProperty =
 			DependencyProperty.Register ( "TitleProperty", typeof ( string ), typeof ( StringListBox ), null );
-		#endregion
+
+		#endregion Title DependencyProperty
 	}
 }

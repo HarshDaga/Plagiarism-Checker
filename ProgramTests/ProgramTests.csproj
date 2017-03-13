@@ -76,19 +76,19 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="fib comments and indentation.c" />
-    <Content Include="fib datatype.c" />
-    <Content Include="fib loop reversed.c" />
-    <Content Include="fib macro.c" />
-    <Content Include="fib redundant expressions.c" />
-    <Content Include="fib redundant var.c" />
-    <Content Include="fib refactored.c" />
-    <Content Include="fib same.c" />
-    <Content Include="fib singular decl.c" />
-    <Content Include="fib var renamed.c" />
-    <Content Include="fib.c" />
-    <Content Include="max condition rev.c" />
-    <Content Include="max.c" />
+    <Content Include="Test Files\fib comments and indentation.c" />
+    <Content Include="Test Files\fib datatype.c" />
+    <Content Include="Test Files\fib loop reversed.c" />
+    <Content Include="Test Files\fib macro.c" />
+    <Content Include="Test Files\fib redundant expressions.c" />
+    <Content Include="Test Files\fib redundant var.c" />
+    <Content Include="Test Files\fib refactored.c" />
+    <Content Include="Test Files\fib same.c" />
+    <Content Include="Test Files\fib singular decl.c" />
+    <Content Include="Test Files\fib var renamed.c" />
+    <Content Include="Test Files\fib.c" />
+    <Content Include="Test Files\max condition rev.c" />
+    <Content Include="Test Files\max.c" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

@@ -23,6 +23,7 @@ namespace GUI.ViewModel
 		private ObservableCollection<DotOutputFormatItem> dotOutputFormats;
 
 		#region Optimizer Settings
+
 		public string BatchFile
 		{
 			get => OptimizerSettings.Instance.BatchFile;
@@ -32,6 +33,7 @@ namespace GUI.ViewModel
 				RaisePropertyChanged ( nameof ( BatchFile ) );
 			}
 		}
+
 		public ObservableCollection<string> GccFlags
 		{
 			get => OptimizerSettings.Instance.GccFlags;
@@ -41,6 +43,7 @@ namespace GUI.ViewModel
 				RaisePropertyChanged ( nameof ( GccFlags ) );
 			}
 		}
+
 		public ObservableCollection<string> Suffixes
 		{
 			get => OptimizerSettings.Instance.Suffixes;
@@ -50,11 +53,13 @@ namespace GUI.ViewModel
 				RaisePropertyChanged ( nameof ( Suffixes ) );
 			}
 		}
+
 		public ObservableCollection<DotOutputFormatItem> DotOutputFormats
 		{
 			get => dotOutputFormats;
 			set => Set ( nameof ( DotOutputFormats ), ref dotOutputFormats, value );
 		}
+
 		public bool Rebuild
 		{
 			get => OptimizerSettings.Instance.Rebuild;
@@ -64,16 +69,19 @@ namespace GUI.ViewModel
 				RaisePropertyChanged ( nameof ( Rebuild ) );
 			}
 		}
-		#endregion
+
+		#endregion Optimizer Settings
 
 		public RelayCommand AddFileCommand { get; private set; }
 		public RelayCommand DeleteFileCommand { get; private set; }
 		public RelayCommand CompareFileCommand { get; private set; }
+
 		public ObservableCollection<FileItem> Files
 		{
 			get => files;
 			set => Set ( nameof ( Files ), ref files, value );
 		}
+
 		public ObservableCollection<ResultItem> Results
 		{
 			get => results;
@@ -121,10 +129,12 @@ namespace GUI.ViewModel
 					case ProgramStatus.Compiled:
 						file.Init ( );
 						break;
+
 					case ProgramStatus.CompiledAndParsed:
 						if ( Rebuild )
 							file.Init ( );
 						break;
+
 					default:
 						break;
 				}
@@ -169,7 +179,8 @@ namespace GUI.ViewModel
 				Files.Add ( new FileItem ( fileName ) { IsChecked = true } );
 			}
 		}
-		#endregion
+
+		#endregion Button Commands
 
 		void IDropTarget.DragOver ( IDropInfo dropInfo )
 		{

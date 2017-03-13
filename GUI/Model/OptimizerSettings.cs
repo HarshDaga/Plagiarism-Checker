@@ -1,13 +1,14 @@
-﻿using GCC_Optimizer;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.IO;
 using System.Web.Script.Serialization;
+using GCC_Optimizer;
 
 namespace GUI.Model
 {
 	public class OptimizerSettings
 	{
 		private static OptimizerSettings instance;
+
 		public static OptimizerSettings Instance
 		{
 			get
@@ -25,7 +26,7 @@ namespace GUI.Model
 		private ObservableCollection<string> suffixes = new ObservableCollection<string> ( Optimizer.Defaults.Suffixes );
 		private ObservableCollection<DotOutputFormat> dotOutputFormats = new ObservableCollection<DotOutputFormat> ( Optimizer.Defaults.DotOutputFormats );
 		private bool rebuild = Optimizer.Defaults.Rebuild;
-		
+
 		public string BatchFile
 		{
 			get => this.batchFile;
@@ -35,6 +36,7 @@ namespace GUI.Model
 				Save ( );
 			}
 		}
+
 		public ObservableCollection<string> GccFlags
 		{
 			get => this.gccFlags;
@@ -44,6 +46,7 @@ namespace GUI.Model
 				Save ( );
 			}
 		}
+
 		public ObservableCollection<string> Suffixes
 		{
 			get => this.suffixes;
@@ -53,6 +56,7 @@ namespace GUI.Model
 				Save ( );
 			}
 		}
+
 		public ObservableCollection<DotOutputFormat> DotOutputFormats
 		{
 			get => this.dotOutputFormats;
@@ -62,6 +66,7 @@ namespace GUI.Model
 				Save ( );
 			}
 		}
+
 		public bool Rebuild
 		{
 			get => this.rebuild;

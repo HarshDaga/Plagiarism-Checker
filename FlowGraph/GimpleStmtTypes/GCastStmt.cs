@@ -29,7 +29,9 @@ namespace FlowGraph
 				_assignee = value;
 			}
 		}
+
 		public string Cast { get; private set; }
+
 		public string V
 		{
 			get

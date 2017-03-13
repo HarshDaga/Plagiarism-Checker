@@ -20,6 +20,7 @@ namespace GCC_Optimizer
 		public static class Defaults
 		{
 			public static readonly string BatchFile = "____temp.bat";
+
 			public static readonly List<string> GccFlags =
 				new List<string>
 				{
@@ -31,18 +32,21 @@ namespace GCC_Optimizer
 					"-fgcse",
 					"-fmerge-all-constants"
 				};
+
 			public static readonly List<string> Suffixes =
 				new List<string>
 				{
 					".190t.optimized",
 					".191t.optimized"
 				};
+
 			public static readonly List<DotOutputFormat> DotOutputFormats =
 				new List<DotOutputFormat>
 				{
 					DotOutputFormat.png,
 					DotOutputFormat.plain
 				};
+
 			public static readonly bool SuppressOutput = true;
 			public static readonly bool Rebuild = true;
 			public static readonly OptimizeResult LastError = OptimizeResult.None;
@@ -304,7 +308,7 @@ namespace GCC_Optimizer
 
 			File.Delete ( BatchFile );
 
-			return ( output, error );
+			return (output, error);
 		}
 
 	}

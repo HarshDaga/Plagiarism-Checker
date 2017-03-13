@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
-using System.IO;
 
 #pragma warning disable CS1591
 
@@ -203,8 +203,8 @@ namespace FlowGraph
 		{
 			foreach ( var v in GVarsDecl )
 			{
-				v.DucAssignments.data.Clear ( );
-				v.DucReferences.data.Clear ( );
+				v.DucAssignments.Data.Clear ( );
+				v.DucReferences.Data.Clear ( );
 			}
 			foreach ( var block in Blocks )
 			{
@@ -266,10 +266,8 @@ namespace FlowGraph
 
 		private void RemoveCasts ( )
 		{
-			Blocks
-				.SelectMany ( b => b.GStatements )
-				.Where ( s => s is GCastStmt )
-				.Select ( s => s as GCastStmt )
+			GStatements
+				.OfType<GCastStmt> ( )
 				.ToList ( )
 				.ForEach ( cast => Rename ( cast.Assignee, cast.V ) );
 			Blocks.ForEach ( b =>
@@ -287,8 +285,8 @@ namespace FlowGraph
 			foreach ( var pair in varMap )
 			{
 				var duc = pair.Value
-					.SelectMany ( x => x.DucAssignments.data )
-					.Union ( pair.Value.SelectMany ( x => x.DucReferences.data ) )
+					.SelectMany ( x => x.DucAssignments.Data )
+					.Union ( pair.Value.SelectMany ( x => x.DucReferences.Data ) )
 					.ToList ( );
 
 				foreach ( var entry in duc )
@@ -403,7 +401,7 @@ namespace FlowGraph
 					correlation[v1][v2] = v1.Map ( v2 );
 				}
 				var probable = correlation[v1]
-					.Where ( x => x.Value != 0 )
+					.Where ( x => x.Value != 0m )
 					.OrderBy ( x => x.Value )
 					.Select ( x => x.Key )
 					.ToList ( );

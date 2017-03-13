@@ -30,6 +30,7 @@ namespace FlowGraph
 				_assignee = value;
 			}
 		}
+
 		public string Var1
 		{
 			get
@@ -43,6 +44,7 @@ namespace FlowGraph
 				_var1 = value;
 			}
 		}
+
 		public string Var2
 		{
 			get
@@ -56,6 +58,7 @@ namespace FlowGraph
 				_var2 = value;
 			}
 		}
+
 		public string Op { get; private set; }
 
 		public GAssignStmt ( string text )

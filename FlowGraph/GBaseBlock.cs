@@ -141,7 +141,7 @@ namespace FlowGraph
 		/// <returns></returns>
 		public List<int> GetOutEdges ( )
 		{
-			var gotos = GStatements.Where ( x => x is GGotoStmt ).Cast<GGotoStmt> ( ).Select ( stmt => stmt.Number ).ToList ( );
+			var gotos = GStatements.OfType<GGotoStmt> ( ).Select ( stmt => stmt.Number ).ToList ( );
 			if ( !( GStatements.Last ( ) is GGotoStmt ) )
 				gotos.Add ( Number + 1 );
 			return gotos;

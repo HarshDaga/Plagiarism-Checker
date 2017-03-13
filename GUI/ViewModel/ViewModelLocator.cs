@@ -4,15 +4,15 @@
       <vm:ViewModelLocatorTemplate xmlns:vm="clr-namespace:GUI.ViewModel"
                                    x:Key="Locator" />
   </Application.Resources>
-  
+
   In the View:
   DataContext="{Binding Source={StaticResource Locator}, Path=ViewModelName}"
 */
 
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Ioc;
-using Microsoft.Practices.ServiceLocation;
 using GUI.Model;
+using Microsoft.Practices.ServiceLocation;
 
 namespace GUI.ViewModel
 {
