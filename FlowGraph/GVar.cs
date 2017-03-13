@@ -64,10 +64,7 @@ public class GVar
 				data.UnionWith ( duc.data );
 		}
 
-		public void Add ( int block, int line )
-		{
-			Data.Add ( new DefineUseChainEntry ( block, line ) );
-		}
+		public void Add ( int block, int line ) => Data.Add ( new DefineUseChainEntry ( block, line ) );
 
 		public decimal Similarity ( DefineUseChain duc )
 		{
@@ -124,15 +121,9 @@ public class GVar
 			return base.Equals ( obj );
 		}
 
-		public override int GetHashCode ( )
-		{
-			return base.GetHashCode ( );
-		}
+		public override int GetHashCode ( ) => base.GetHashCode ( );
 
-		public override string ToString ( )
-		{
-			return string.Join ( "\n", Data );
-		}
+		public override string ToString ( ) => string.Join ( "\n", Data );
 
 	}
 

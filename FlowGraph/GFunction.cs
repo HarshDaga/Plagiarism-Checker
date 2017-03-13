@@ -84,10 +84,7 @@ namespace FlowGraph
 		/// <summary>
 		/// <see cref="Dictionary{TKey, TValue}"/> of <see cref="string"/> mapped to <see cref="GVar"/> by the variable name with its GIMPLE suffix.
 		/// </summary>
-		public List<GimpleStmt> GStatements
-		{
-			get => Blocks.SelectMany ( b => b.GStatements ).ToList ( );
-		}
+		public List<GimpleStmt> GStatements => Blocks.SelectMany ( b => b.GStatements ).ToList ( );
 
 		/// <summary>
 		/// Build all the <see cref="GBaseBlock"/>s and other members using the GIMPLE input file.
@@ -382,10 +379,7 @@ namespace FlowGraph
 			return base.Equals ( obj );
 		}
 
-		public override int GetHashCode ( )
-		{
-			return base.GetHashCode ( );
-		}
+		public override int GetHashCode ( ) => base.GetHashCode ( );
 
 		public Dictionary<GVar, List<GVar>> GetVarMap ( GFunction gFunc )
 		{

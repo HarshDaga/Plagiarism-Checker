@@ -41,15 +41,9 @@ namespace FlowGraph
 		/// </summary>
 		/// <param name="stmt"></param>
 		/// <returns></returns>
-		public static bool Matches ( string stmt )
-		{
-			return Regex.IsMatch ( stmt, myPattern );
-		}
+		public static bool Matches ( string stmt ) => Regex.IsMatch ( stmt, myPattern );
 
-		public override string ToString ( )
-		{
-			return $"{FuncName} ({string.Join ( ", ", Args )});";
-		}
+		public override string ToString ( ) => $"{FuncName} ({string.Join ( ", ", Args )});";
 
 		public override List<string> Rename ( string oldName, string newName )
 		{
@@ -71,9 +65,6 @@ namespace FlowGraph
 			return base.Equals ( obj );
 		}
 
-		public override int GetHashCode ( )
-		{
-			return base.GetHashCode ( );
-		}
+		public override int GetHashCode ( ) => base.GetHashCode ( );
 	}
 }

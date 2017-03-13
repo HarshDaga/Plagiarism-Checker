@@ -182,14 +182,8 @@ namespace FlowGraph
 				return false;
 		}
 
-		public override int GetHashCode ( )
-		{
-			return base.GetHashCode ( );
-		}
+		public override int GetHashCode ( ) => base.GetHashCode ( );
 
-		public override string ToString ( )
-		{
-			return string.Join ( "\n", GStatements );
-		}
+		public override string ToString ( ) => string.Join ( "\n", GStatements );
 	}
 }

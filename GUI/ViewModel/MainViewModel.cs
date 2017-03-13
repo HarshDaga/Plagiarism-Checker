@@ -182,6 +182,8 @@ namespace GUI.ViewModel
 
 		#endregion Button Commands
 
+		#region Drag Drop Handlers
+
 		void IDropTarget.DragOver ( IDropInfo dropInfo )
 		{
 			var dragFileList = ( (DataObject) dropInfo.Data ).GetFileDropList ( ).Cast<string> ( );
@@ -206,6 +208,8 @@ namespace GUI.ViewModel
 				  return extension != null && extension.Equals ( ".c" );
 			  } ) ? DragDropEffects.Copy : DragDropEffects.None;
 		}
+
+		#endregion Drag Drop Handlers
 
 		////public override void Cleanup()
 		////{

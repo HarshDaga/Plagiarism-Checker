@@ -11,7 +11,7 @@ namespace FlowGraph
 	/// </summary>
 	public class GBBStmt : GimpleStmt
 	{
-		private static string myPattern = "<bb (?<number>[0-9]+)>:";
+		private static readonly string myPattern = "<bb (?<number>[0-9]+)>:";
 
 		/// <summary>
 		/// Base Block number.
@@ -32,31 +32,10 @@ namespace FlowGraph
 		/// </summary>
 		/// <param name="stmt"></param>
 		/// <returns></returns>
-		public static bool Matches ( string stmt )
-		{
-			return Regex.IsMatch ( stmt, myPattern );
-		}
+		public static bool Matches ( string stmt ) => Regex.IsMatch ( stmt, myPattern );
 
-		public override string ToString ( )
-		{
-			return $"<bb {Number}>:";
-		}
+		public override string ToString ( ) => $"<bb {Number}>:";
 
-		public override List<string> Rename ( string oldName, string newName )
-		{
-			return base.Rename ( oldName, newName );
-		}
-
-		public override bool Equals ( object obj )
-		{
-			if ( obj is GBBStmt )
-				return ToString ( ) == ( obj as GBBStmt ).ToString ( );
-			return base.Equals ( obj );
-		}
-
-		public override int GetHashCode ( )
-		{
-			return base.GetHashCode ( );
-		}
+		public override List<string> Rename ( string oldName, string newName ) => base.Rename ( oldName, newName );
 	}
 }

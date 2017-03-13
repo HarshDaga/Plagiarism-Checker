@@ -66,10 +66,7 @@ namespace FlowGraph
 		/// Return the current statement as a <see cref="string"/> rebuilt using the saved variable names.
 		/// </summary>
 		/// <returns></returns>
-		public override string ToString ( )
-		{
-			return Text;
-		}
+		public override string ToString ( ) => Text;
 
 		/// <summary>
 		/// Cast <paramref name="obj"/> to a <see cref="GimpleStmt"/> and compare them as a <see cref="string"/>.
@@ -83,10 +80,7 @@ namespace FlowGraph
 			return base.Equals ( obj );
 		}
 
-		public override int GetHashCode ( )
-		{
-			return base.GetHashCode ( );
-		}
+		public override int GetHashCode ( ) => base.GetHashCode ( );
 
 		/// <summary>
 		/// Check if both are null first and then if both are same using <see cref="Equals(object)"/>.

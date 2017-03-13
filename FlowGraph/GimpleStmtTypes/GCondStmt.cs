@@ -11,7 +11,7 @@ namespace FlowGraph
 	/// </summary>
 	public class GCondStmt : GimpleStmt
 	{
-		private static string myPattern = @"if \((?<op1>[\w\.]*) (?<op>\S*) (?<op2>[\w\.]*)\)";
+		private static readonly string myPattern = @"if \((?<op1>[\w\.]*) (?<op>\S*) (?<op2>[\w\.]*)\)";
 
 		public string Op1 { get; private set; }
 		public string Op2 { get; private set; }
@@ -28,22 +28,15 @@ namespace FlowGraph
 			Op = match.Groups["op"].Value;
 			Vars.AddRange ( new[] { Op1, Op2 }.Where ( x => IsValidIdentifier ( x ) ) );
 		}
-
-
+		
 		/// <summary>
 		/// Compare given <paramref name="stmt"/> to <see cref="myPattern"/> using <see cref="Regex"/>.
 		/// </summary>
 		/// <param name="stmt"></param>
 		/// <returns></returns>
-		public static bool Matches ( string stmt )
-		{
-			return Regex.IsMatch ( stmt, myPattern );
-		}
+		public static bool Matches ( string stmt ) => Regex.IsMatch ( stmt, myPattern );
 
-		public override string ToString ( )
-		{
-			return $"if ({Op1} {Op} {Op2})";
-		}
+		public override string ToString ( ) => $"if ({Op1} {Op} {Op2})";
 
 		public override List<string> Rename ( string oldName, string newName )
 		{

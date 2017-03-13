@@ -11,7 +11,7 @@ namespace FlowGraph
 	/// </summary>
 	public class GPhiStmt : GimpleStmt
 	{
-		private static string myPattern = @"# (?<assignee>[\w\.]*) = PHI <(?<var1>[\w\.]*)\((?<bb1>\S*)\)(, (?<var2>[\w\.]*)\((?<bb2>\S*)\))?>";
+		private static readonly string myPattern = @"# (?<assignee>[\w\.]*) = PHI <(?<var1>[\w\.]*)\((?<bb1>\S*)\)(, (?<var2>[\w\.]*)\((?<bb2>\S*)\))?>";
 
 		public string Assignee { get; private set; }
 		public string Var1 { get; private set; }
@@ -32,17 +32,13 @@ namespace FlowGraph
 			Bb2 = match.Groups["bb2"].Value;
 			Vars.AddRange ( new[] { Assignee, Var1, Var2 }.Where ( x => IsValidIdentifier ( x ) ) );
 		}
-
-
+		
 		/// <summary>
 		/// Compare given <paramref name="stmt"/> to <see cref="myPattern"/> using <see cref="Regex"/>.
 		/// </summary>
 		/// <param name="stmt"></param>
 		/// <returns></returns>
-		public static bool Matches ( string stmt )
-		{
-			return Regex.IsMatch ( stmt, myPattern );
-		}
+		public static bool Matches ( string stmt ) => Regex.IsMatch ( stmt, myPattern );
 
 		public override string ToString ( )
 		{
@@ -59,18 +55,6 @@ namespace FlowGraph
 			if ( object.Equals ( Var2, oldName ) )
 				Var2 = newName;
 			return base.Rename ( oldName, newName );
-		}
-
-		public override bool Equals ( object obj )
-		{
-			if ( obj is GPhiStmt )
-				return ToString ( ) == ( obj as GPhiStmt ).ToString ( );
-			return base.Equals ( obj );
-		}
-
-		public override int GetHashCode ( )
-		{
-			return base.GetHashCode ( );
 		}
 	}
 }

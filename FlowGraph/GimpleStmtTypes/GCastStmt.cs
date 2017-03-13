@@ -24,10 +24,7 @@ namespace FlowGraph
 					return ( new GArrayDereference ( _assignee ).Name );
 				return _assignee;
 			}
-			private set
-			{
-				_assignee = value;
-			}
+			private set => _assignee = value;
 		}
 
 		public string Cast { get; private set; }
@@ -40,10 +37,7 @@ namespace FlowGraph
 					return ( new GArrayDereference ( _v ).Name );
 				return _v;
 			}
-			private set
-			{
-				_v = value;
-			}
+			private set => _v = value;
 		}
 
 		public GCastStmt ( string text )
@@ -63,15 +57,9 @@ namespace FlowGraph
 		/// </summary>
 		/// <param name="stmt"></param>
 		/// <returns></returns>
-		public static bool Matches ( string stmt )
-		{
-			return Regex.IsMatch ( stmt, myPattern );
-		}
+		public static bool Matches ( string stmt ) => Regex.IsMatch ( stmt, myPattern );
 
-		public override string ToString ( )
-		{
-			return $"{_assignee} = ({Cast}) {_v};";
-		}
+		public override string ToString ( ) => $"{_assignee} = ({Cast}) {_v};";
 
 		public override List<string> Rename ( string oldName, string newName )
 		{
@@ -103,18 +91,6 @@ namespace FlowGraph
 					_v = newName;
 			}
 			return base.Rename ( oldName, newName );
-		}
-
-		public override bool Equals ( object obj )
-		{
-			if ( obj is GCastStmt )
-				return ToString ( ) == ( obj as GCastStmt ).ToString ( );
-			return base.Equals ( obj );
-		}
-
-		public override int GetHashCode ( )
-		{
-			return base.GetHashCode ( );
 		}
 	}
 }

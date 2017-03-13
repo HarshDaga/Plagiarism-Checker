@@ -10,7 +10,7 @@ namespace FlowGraph
 	/// </summary>
 	public class GElseStmt : GimpleStmt
 	{
-		private static string myPattern = "else";
+		private static readonly string myPattern = "else";
 
 		public GElseStmt ( string text )
 		{
@@ -19,37 +19,15 @@ namespace FlowGraph
 			Pattern = myPattern;
 		}
 
-
 		/// <summary>
 		/// Compare given <paramref name="stmt"/> to <see cref="myPattern"/> using <see cref="Regex"/>.
 		/// </summary>
 		/// <param name="stmt"></param>
 		/// <returns></returns>
-		public static bool Matches ( string stmt )
-		{
-			return Regex.IsMatch ( stmt, myPattern );
-		}
+		public static bool Matches ( string stmt ) => Regex.IsMatch ( stmt, myPattern );
 
-		public override string ToString ( )
-		{
-			return $"else";
-		}
+		public override string ToString ( ) => $"else";
 
-		public override List<string> Rename ( string oldName, string newName )
-		{
-			return base.Rename ( oldName, newName );
-		}
-
-		public override bool Equals ( object obj )
-		{
-			if ( obj is GElseStmt )
-				return ToString ( ) == ( obj as GElseStmt ).ToString ( );
-			return base.Equals ( obj );
-		}
-
-		public override int GetHashCode ( )
-		{
-			return base.GetHashCode ( );
-		}
+		public override List<string> Rename ( string oldName, string newName ) => base.Rename ( oldName, newName );
 	}
 }

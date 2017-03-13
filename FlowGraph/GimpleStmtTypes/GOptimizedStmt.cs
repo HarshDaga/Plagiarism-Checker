@@ -10,7 +10,7 @@ namespace FlowGraph
 	/// </summary>
 	public class GOptimizedStmt : GimpleStmt
 	{
-		private static string myPattern = @"(?<assignee>[\w\.]*) = (?<func>\w*)\s*<(?<args>.*)>;";
+		private static readonly string myPattern = @"(?<assignee>[\w\.]*) = (?<func>\w*)\s*<(?<args>.*)>;";
 
 		public string Assignee { get; private set; }
 		public string FuncName { get; private set; }
@@ -40,15 +40,9 @@ namespace FlowGraph
 		/// </summary>
 		/// <param name="stmt"></param>
 		/// <returns></returns>
-		public static bool Matches ( string stmt )
-		{
-			return Regex.IsMatch ( stmt, myPattern );
-		}
+		public static bool Matches ( string stmt ) => Regex.IsMatch ( stmt, myPattern );
 
-		public override string ToString ( )
-		{
-			return $"{Assignee} = {FuncName} <{string.Join ( ", ", Args )}>;";
-		}
+		public override string ToString ( ) => $"{Assignee} = {FuncName} <{string.Join ( ", ", Args )}>;";
 
 		public override List<string> Rename ( string oldName, string newName )
 		{
@@ -58,18 +52,6 @@ namespace FlowGraph
 				if ( Args[i] == oldName )
 					Args[i] = newName;
 			return base.Rename ( oldName, newName );
-		}
-
-		public override bool Equals ( object obj )
-		{
-			if ( obj is GAssignStmt )
-				return ToString ( ) == ( obj as GAssignStmt ).ToString ( );
-			return base.Equals ( obj );
-		}
-
-		public override int GetHashCode ( )
-		{
-			return base.GetHashCode ( );
 		}
 	}
 }

@@ -11,7 +11,7 @@ namespace FlowGraph
 	/// </summary>
 	public class GReturnStmt : GimpleStmt
 	{
-		private static string myPattern = @"return( (?<retval>\S*))?;";
+		private static readonly string myPattern = @"return( (?<retval>\S*))?;";
 
 		public string Retval { get; private set; }
 
@@ -30,10 +30,7 @@ namespace FlowGraph
 		/// </summary>
 		/// <param name="stmt"></param>
 		/// <returns></returns>
-		public static bool Matches ( string stmt )
-		{
-			return Regex.IsMatch ( stmt, myPattern );
-		}
+		public static bool Matches ( string stmt ) => Regex.IsMatch ( stmt, myPattern );
 
 		public override string ToString ( )
 		{
@@ -46,18 +43,6 @@ namespace FlowGraph
 			if ( object.Equals ( Retval, oldName ) )
 				Retval = newName;
 			return base.Rename ( oldName, newName );
-		}
-
-		public override bool Equals ( object obj )
-		{
-			if ( obj is GReturnStmt )
-				return ToString ( ) == ( obj as GReturnStmt ).ToString ( );
-			return base.Equals ( obj );
-		}
-
-		public override int GetHashCode ( )
-		{
-			return base.GetHashCode ( );
 		}
 	}
 }

@@ -4,28 +4,20 @@
 
 public class GArrayDereference : GVar
 {
+	public static readonly string pattern = @"^MEM\[base: (?<name>[\w\.]+), offset: (?<offset>\w+)]$";
+
 	public string Offset { get; set; }
 
 	public GArrayDereference ( string str )
 	{
-		string pattern = @"MEM\[base: (?<name>[\w\.]+), offset: (?<offset>\w+)]";
 		var match = Regex.Match ( str, pattern );
 		Name = match.Groups["name"].Value;
 		Offset = match.Groups["offset"].Value;
 	}
 
-	public static bool Matches ( string str )
-	{
-		return Regex.IsMatch ( str, @"^MEM\[base: (?<name>[\w\.]+), offset: (?<offset>\w+)]$" );
-	}
+	public static bool Matches ( string str ) => Regex.IsMatch ( str, pattern );
 
-	public override int GetHashCode ( )
-	{
-		return Name.GetHashCode ( );
-	}
+	public override int GetHashCode ( ) => Name.GetHashCode ( );
 
-	public override string ToString ( )
-	{
-		return $"MEM[base: {Name}, offset: {Offset}]";
-	}
+	public override string ToString ( ) => $"MEM[base: {Name}, offset: {Offset}]";
 }
