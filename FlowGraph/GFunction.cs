@@ -307,16 +307,44 @@ namespace FlowGraph
 			}
 		}
 
+		private static int LevenshteinDistance ( List<GimpleStmt> a, List<GimpleStmt> b )
+		{
+			if ( a.Count == 0 || b.Count == 0 )
+				return 0;
+
+			int lengthA = a.Count;
+			int lengthB = b.Count;
+
+			var distances = new int[lengthA + 1, lengthB + 1];
+			for ( int i = 0; i <= lengthA; distances[i, 0] = i++ )
+				;
+			for ( int j = 0; j <= lengthB; distances[0, j] = j++ )
+				;
+
+			for ( int i = 1; i <= lengthA; i++ )
+			{
+				for ( int j = 1; j <= lengthB; j++ )
+				{
+					int cost = b[j - 1] == a[i - 1] ? 0 : 1;
+					distances[i, j] = Math.Min
+						(
+						Math.Min ( distances[i - 1, j] + 1, distances[i, j - 1] + 1 ),
+						distances[i - 1, j - 1] + cost
+						);
+				}
+			}
+
+			return distances[lengthA, lengthB];
+		}
+
 		public decimal Compare ( GFunction gFunc )
 		{
 			PreProcess ( gFunc );
 			decimal count = 0;
 			var lhsStmts = GStatements;
 			var rhsStmts = gFunc.GStatements;
-			for ( int i = 0; i < lhsStmts.Count && i < rhsStmts.Count; ++i )
-				if ( lhsStmts[i] == rhsStmts[i] )
-					++count;
-			decimal result = 200m * count / ( lhsStmts.Count + rhsStmts.Count );
+			count = LevenshteinDistance ( lhsStmts, rhsStmts );
+			decimal result = 100m - 100m * count / Math.Max ( lhsStmts.Count, rhsStmts.Count );
 
 			gFunc.Reset ( );
 
