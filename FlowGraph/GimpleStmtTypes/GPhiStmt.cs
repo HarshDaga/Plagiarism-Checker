@@ -11,13 +11,10 @@ namespace FlowGraph
 	/// </summary>
 	public class GPhiStmt : GimpleStmt
 	{
-		private static readonly string myPattern = @"# (?<assignee>[\w\.]*) = PHI <(?<var1>[\w\.]*)\((?<bb1>\S*)\)(, (?<var2>[\w\.]*)\((?<bb2>\S*)\))?>";
+		private static readonly string myPattern = @"# (?<assignee>[\w\.]*) = PHI <(?<branches>(([\w\.]*)\((\S*)\)(, )?)+)>";
 
 		public string Assignee { get; private set; }
-		public string Var1 { get; private set; }
-		public string Var2 { get; private set; }
-		public string Bb1 { get; private set; }
-		public string Bb2 { get; private set; }
+		public List<(string v, string bb)> Branches { get; set; } = new List<(string v, string bb)> ( );
 
 		public GPhiStmt ( string text )
 		{
@@ -26,11 +23,16 @@ namespace FlowGraph
 			Pattern = myPattern;
 			var match = Regex.Match ( text, myPattern );
 			Assignee = match.Groups["assignee"].Value;
-			Var1 = match.Groups["var1"].Value;
-			Var2 = match.Groups["var2"].Value;
-			Bb1 = match.Groups["bb1"].Value;
-			Bb2 = match.Groups["bb2"].Value;
-			Vars.AddRange ( new[] { Assignee, Var1, Var2 }.Where ( x => IsValidIdentifier ( x ) ) );
+			var strBranches = match.Groups["branches"].Value;
+			string branchPattern = @"(?<v>[\w\.]+)\((?<bb>\d+)\)";
+
+			foreach ( Match m in Regex.Matches ( strBranches, branchPattern ) )
+			{
+				Branches.Add ( (m.Groups["v"].Value, m.Groups["bb"].Value) );
+			}
+			if ( IsValidIdentifier ( Assignee ) )
+				Vars.Add ( Assignee );
+			Vars.AddRange ( Branches.Select ( b => b.v ).Where ( v => IsValidIdentifier ( v ) ) );
 		}
 		
 		/// <summary>
@@ -42,18 +44,23 @@ namespace FlowGraph
 
 		public override string ToString ( )
 		{
-			string second = Var2 == "" ? "" : $", {Var2}({Bb2})";
-			return $"# {Assignee} = PHI <{Var1}({Bb1}){second}>";
+			var strBranches = string.Join ( ", ", Branches.Select ( b => $"{b.v}({b.bb})" ) );
+			return $"# {Assignee} = PHI <{strBranches}>";
 		}
 
 		public override List<string> Rename ( string oldName, string newName )
 		{
 			if ( Assignee == oldName )
 				Assignee = newName;
-			if ( Var1 == oldName )
-				Var1 = newName;
-			if ( object.Equals ( Var2, oldName ) )
-				Var2 = newName;
+			List<(string v, string bb)> newBranches = new List<(string v, string bb)> ( );
+			foreach ( var branch in Branches )
+			{
+				if ( branch.v == oldName )
+					newBranches.Add ( (newName, branch.bb) );
+				else
+					newBranches.Add ( branch );
+			}
+			Branches = newBranches;
 			return base.Rename ( oldName, newName );
 		}
 	}
