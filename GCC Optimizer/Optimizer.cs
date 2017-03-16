@@ -215,8 +215,18 @@ namespace GCC_Optimizer
 			oldOptimizedDot = oldOptimizedGIMPLE + ".dot";
 
 			if ( dir.Exists )
+			{
 				foreach ( var f in dir.GetFiles ( ) )
-					f.Delete ( );
+				{
+					try
+					{
+						f.Delete ( );
+					}
+					catch ( System.Exception ex )
+					{
+					}
+				}
+			}
 			else
 				dir.Create ( );
 			while ( !dir.Exists )
