@@ -10,7 +10,10 @@ namespace ProgramTests
 	{
 		public static GFunction GetGFunction ( string fileName )
 		{
-			var optimizer = new Optimizer ( fileName );
+			var optimizer = new Optimizer ( fileName )
+			{
+				Rebuild = true
+			};
 			optimizer.Run ( );
 			var gimple = optimizer.GIMPLE;
 

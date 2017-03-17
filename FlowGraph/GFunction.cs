@@ -52,6 +52,11 @@ namespace FlowGraph
 		public int Symbol_order { get; private set; }
 
 		/// <summary>
+		/// Number of iterations performed when comparing 2 <see cref="GFunction"/>s.
+		/// </summary>
+		public int Iterations { get; set; }
+
+		/// <summary>
 		/// Functions formal arguments.
 		/// </summary>
 		public string Args { get; private set; }
@@ -93,6 +98,8 @@ namespace FlowGraph
 		/// <param name="fileName">Name of the file this function belongs to.</param>
 		public GFunction ( List<string> gimple, string fileName = "" )
 		{
+			if ( Iterations < 1 )
+				Iterations = 1;
 			Initialize ( gimple );
 			this.FileName = fileName;
 		}
@@ -277,6 +284,55 @@ namespace FlowGraph
 
 		private void PreProcess ( GFunction gFunc )
 		{
+			for ( int times = 0; times != Iterations; ++times )
+			{
+				var varMap = GetVarMap ( gFunc )
+					.ToDictionary ( x => x.Key.Name, x => x.Value.Select ( y => y.Name ).ToList ( ) );
+				var revVarMap = varMap
+					.GroupBy ( x => string.Join ( ", ", x.Value.OrderBy ( v => v ) ) )
+					.Where ( x => x.Count ( ) > 1 )
+					.ToDictionary ( x => x.Key, x => x.Select ( y => y.Key ).ToList ( ) );
+
+				var lhsVars = this.GStatements.SelectMany ( b => b.Vars ).Distinct ( ).ToList ( );
+				var rhsVars = gFunc.GStatements.SelectMany ( b => b.Vars ).Distinct ( ).ToList ( );
+
+				foreach ( var rhsVar in lhsVars )
+				{
+					if ( !UsedToDeclMap.ContainsKey ( rhsVar ) )
+						continue;
+					this.Rename ( rhsVar, UsedToDeclMap[rhsVar].Name );
+				}
+				foreach ( var rhsVar in rhsVars )
+				{
+					if ( !gFunc.UsedToDeclMap.ContainsKey ( rhsVar ) )
+						continue;
+					gFunc.Rename ( rhsVar, gFunc.UsedToDeclMap[rhsVar].Name );
+				}
+
+				foreach ( var pair in varMap )
+				{
+					if ( revVarMap.ContainsKey ( pair.Value.First ( ) ) )
+						this.Rename ( pair.Key, pair.Value.First ( ) );
+					else
+						foreach ( var v in pair.Value )
+							gFunc.Rename ( v, pair.Key );
+				}
+
+				gFunc.GetVarsUsed ( );
+				gFunc.BuildUsedToDeclMap ( );
+				gFunc.BuildDUC ( );
+				this.GetVarsUsed ( );
+				this.BuildUsedToDeclMap ( );
+				this.BuildDUC ( );
+			}
+		}
+
+		/// <summary>
+		/// This is messed up and probably stupid of me to implement...
+		/// </summary>
+		/// <param name="gFunc"></param>
+		private void PreProcessLineByLine ( GFunction gFunc )
+		{
 			var varMap = GetVarMap ( gFunc );
 
 			foreach ( var pair in varMap )
@@ -288,6 +344,11 @@ namespace FlowGraph
 
 				foreach ( var entry in duc )
 				{
+					if ( BlockMap[entry.block].GStatements.Count < entry.line )
+						continue;
+					if ( gFunc.BlockMap[entry.block].GStatements.Count < entry.line )
+						continue;
+
 					var lhsStmt = BlockMap[entry.block].GStatements[entry.line - 1];
 					var rhsStmt = gFunc.BlockMap[entry.block].GStatements[entry.line - 1];
 
@@ -363,10 +424,7 @@ namespace FlowGraph
 			}
 		}
 
-		public void Reset ( )
-		{
-			Initialize ( Gimple );
-		}
+		public void Reset ( ) => Initialize ( Gimple );
 
 		/// <summary>
 		/// Compare the <see cref="GFunction.Blocks"/> of both <see cref="GFunction"/> using <code>SequenceEqual()</code>.
@@ -424,7 +482,7 @@ namespace FlowGraph
 				}
 				var probable = correlation[v1]
 					.Where ( x => x.Value != 0m )
-					.OrderBy ( x => x.Value )
+					.OrderBy ( x => x.Value * -1m )
 					.Select ( x => x.Key )
 					.ToList ( );
 				var minimal = new List<GVar> ( );
@@ -447,7 +505,7 @@ namespace FlowGraph
 				{
 					var probable = correlation
 						.Where ( x => x.Value[v1] != 0m )
-						.OrderBy ( x => x.Value[v1] )
+						.OrderBy ( x => x.Value[v1] * -1m )
 						.Select ( x => x.Key )
 						.ToList ( );
 					var minimal = new List<GVar> ( );

@@ -44,6 +44,8 @@ namespace GCC_Optimizer
 				new List<DotOutputFormat>
 				{
 					DotOutputFormat.png,
+					DotOutputFormat.jpg,
+					DotOutputFormat.pdf,
 					DotOutputFormat.plain
 				};
 
