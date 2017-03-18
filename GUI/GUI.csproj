@@ -142,7 +142,7 @@
     <Compile Include="Model\FileItem.cs" />
     <Compile Include="Model\DataService.cs" />
     <Compile Include="Model\IDataService.cs" />
-    <Compile Include="Model\OptimizerSettings.cs" />
+    <Compile Include="Model\Settings.cs" />
     <Compile Include="Model\ProgramStatus.cs" />
     <Compile Include="Model\ResultItem.cs" />
     <Compile Include="UserControls\StringListBox.xaml.cs">

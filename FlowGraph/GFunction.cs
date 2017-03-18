@@ -15,6 +15,12 @@ namespace FlowGraph
 	[DebuggerDisplay ( "{Name} in {FileName} : Threshold = {Threshold}" )]
 	public class GFunction
 	{
+		public static class Defaults
+		{
+			public static readonly decimal Threshold = .95m;
+			public static readonly int Iterations = 1;
+		}
+
 		/// <summary>
 		/// All lines in the GIMPLE file.
 		/// </summary>
@@ -34,7 +40,7 @@ namespace FlowGraph
 		/// Threshold to be used when comparing variables (0 - 1)
 		/// Default: 0.95m
 		/// </summary>
-		public decimal Threshold { get; set; } = 0.95m;
+		public decimal Threshold { get; set; } = Defaults.Threshold;
 
 		/// <summary>
 		/// funcdef_no of the function.
@@ -54,7 +60,7 @@ namespace FlowGraph
 		/// <summary>
 		/// Number of iterations performed when comparing 2 <see cref="GFunction"/>s.
 		/// </summary>
-		public int Iterations { get; set; }
+		public int Iterations { get; set; } = Defaults.Iterations;
 
 		/// <summary>
 		/// Functions formal arguments.

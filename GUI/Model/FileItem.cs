@@ -67,11 +67,11 @@ namespace GUI.Model
 			{
 				optimizer = new Optimizer ( _fileName )
 				{
-					BatchFile = OptimizerSettings.Instance.BatchFile,
-					GccFlags = OptimizerSettings.Instance.GccFlags.ToList ( ),
-					DotOutputFormats = OptimizerSettings.Instance.DotOutputFormats.ToList ( ),
-					Suffixes = OptimizerSettings.Instance.Suffixes.ToList ( ),
-					Rebuild = OptimizerSettings.Instance.Rebuild
+					BatchFile = Settings.Instance.BatchFile,
+					GccFlags = Settings.Instance.GccFlags.ToList ( ),
+					DotOutputFormats = Settings.Instance.DotOutputFormats.ToList ( ),
+					Suffixes = Settings.Instance.Suffixes.ToList ( ),
+					Rebuild = Settings.Instance.Rebuild
 				};
 				if ( !IsFaulty )
 					optimizer.Run ( );
@@ -84,7 +84,11 @@ namespace GUI.Model
 			if ( optimizer == null )
 				InitOptimizer ( );
 			if ( !IsFaulty )
-				gFunc = new GFunction ( optimizer.GIMPLE, FileName );
+				gFunc = new GFunction ( optimizer.GIMPLE, FileName )
+				{
+					Threshold = Settings.Instance.Threshold,
+					Iterations = Settings.Instance.Iterations
+				};
 			RaisePropertyChanged ( nameof ( Status ) );
 		}
 	}

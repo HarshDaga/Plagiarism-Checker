@@ -17,14 +17,14 @@ namespace GUI.Model
 
 		public bool IsChecked
 		{
-			get => OptimizerSettings.Instance.DotOutputFormats.Contains ( format );
+			get => Settings.Instance.DotOutputFormats.Contains ( format );
 			set
 			{
-				if ( value && !OptimizerSettings.Instance.DotOutputFormats.Contains ( format ) )
-					OptimizerSettings.Instance.DotOutputFormats.Add ( format );
+				if ( value && !Settings.Instance.DotOutputFormats.Contains ( format ) )
+					Settings.Instance.DotOutputFormats.Add ( format );
 				else if ( !value )
-					OptimizerSettings.Instance.DotOutputFormats.Remove ( format );
-				OptimizerSettings.Save ( );
+					Settings.Instance.DotOutputFormats.Remove ( format );
+				Settings.Save ( );
 				RaisePropertyChanged ( nameof ( IsChecked ) );
 			}
 		}

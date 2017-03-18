@@ -108,7 +108,7 @@ namespace FlowGraph
 				throw new ArgumentOutOfRangeException ( );
 			var gBlockDecl = new GBBStmt ( block[0] );
 			Number = gBlockDecl.Number;
-			int line = 1;
+			int line = 0;
 			foreach ( var stmt in block )
 			{
 				var gStmt = ToGimpleStmt ( stmt );
@@ -125,7 +125,7 @@ namespace FlowGraph
 		public void RenumberLines ( )
 		{
 			for ( int i = 0; i != GStatements.Count; ++i )
-				GStatements[i].Linenum = i + 1;
+				GStatements[i].Linenum = i;
 		}
 
 		public HashSet<string> Rename ( string oldName, string newName )

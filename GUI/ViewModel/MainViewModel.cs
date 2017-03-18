@@ -26,30 +26,30 @@ namespace GUI.ViewModel
 
 		public string BatchFile
 		{
-			get => OptimizerSettings.Instance.BatchFile;
+			get => Settings.Instance.BatchFile;
 			set
 			{
-				OptimizerSettings.Instance.BatchFile = value;
+				Settings.Instance.BatchFile = value;
 				RaisePropertyChanged ( nameof ( BatchFile ) );
 			}
 		}
 
 		public ObservableCollection<string> GccFlags
 		{
-			get => OptimizerSettings.Instance.GccFlags;
+			get => Settings.Instance.GccFlags;
 			set
 			{
-				OptimizerSettings.Instance.GccFlags = value;
+				Settings.Instance.GccFlags = value;
 				RaisePropertyChanged ( nameof ( GccFlags ) );
 			}
 		}
 
 		public ObservableCollection<string> Suffixes
 		{
-			get => OptimizerSettings.Instance.Suffixes;
+			get => Settings.Instance.Suffixes;
 			set
 			{
-				OptimizerSettings.Instance.Suffixes = value;
+				Settings.Instance.Suffixes = value;
 				RaisePropertyChanged ( nameof ( Suffixes ) );
 			}
 		}
@@ -62,15 +62,39 @@ namespace GUI.ViewModel
 
 		public bool Rebuild
 		{
-			get => OptimizerSettings.Instance.Rebuild;
+			get => Settings.Instance.Rebuild;
 			set
 			{
-				OptimizerSettings.Instance.Rebuild = value;
+				Settings.Instance.Rebuild = value;
 				RaisePropertyChanged ( nameof ( Rebuild ) );
 			}
 		}
 
 		#endregion Optimizer Settings
+
+		#region FlowGraph Settings
+
+		public decimal Threshold
+		{
+			get => Settings.Instance.Threshold;
+			set
+			{
+				Settings.Instance.Threshold = value;
+				RaisePropertyChanged ( nameof ( Threshold ) );
+			}
+		}
+
+		public int Iterations
+		{
+			get => Settings.Instance.Iterations;
+			set
+			{
+				Settings.Instance.Iterations = value;
+				RaisePropertyChanged ( nameof ( Iterations ) );
+			}
+		}
+
+		#endregion
 
 		public RelayCommand AddFileCommand { get; private set; }
 		public RelayCommand DeleteFileCommand { get; private set; }
@@ -112,7 +136,7 @@ namespace GUI.ViewModel
 			foreach ( var e in Enum.GetValues ( typeof ( DotOutputFormat ) ).Cast<DotOutputFormat> ( ) )
 				dotOutputFormats.Add ( new DotOutputFormatItem ( e ) );
 
-			OptimizerSettings.Load ( );
+			Settings.Load ( );
 		}
 
 		#region Button Commands
