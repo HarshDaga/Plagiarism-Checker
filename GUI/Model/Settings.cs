@@ -30,6 +30,7 @@ namespace GUI.Model
 
 		private decimal threshold = GFunction.Defaults.Threshold;
 		private int iterations = GFunction.Defaults.Iterations;
+		private bool dumpIntermediateGimple = GFunction.Defaults.DumpIntermediateGimple;
 
 		public string BatchFile
 		{
@@ -97,6 +98,16 @@ namespace GUI.Model
 			set
 			{
 				this.iterations = value;
+				Save ( );
+			}
+		}
+
+		public bool DumpIntermediateGimple
+		{
+			get => this.dumpIntermediateGimple;
+			set
+			{
+				this.dumpIntermediateGimple = value;
 				Save ( );
 			}
 		}

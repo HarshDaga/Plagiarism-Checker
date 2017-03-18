@@ -19,6 +19,7 @@ namespace FlowGraph
 		{
 			public static readonly decimal Threshold = .95m;
 			public static readonly int Iterations = 1;
+			public static bool DumpIntermediateGimple = true;
 		}
 
 		/// <summary>
@@ -98,6 +99,13 @@ namespace FlowGraph
 		public List<GimpleStmt> GStatements => Blocks.SelectMany ( b => b.GStatements ).ToList ( );
 
 		/// <summary>
+		/// <see cref="Dictionary{TKey, TValue}"/> of <see cref="string"/> mapped to <see cref="GVar"/> by the variable name with its GIMPLE suffix.
+		/// </summary>
+		public bool DumpIntermediateGimple { get; set; } = Defaults.DumpIntermediateGimple;
+
+		public string Folder => Path.GetFileNameWithoutExtension ( FileName );
+
+		/// <summary>
 		/// Build all the <see cref="GBaseBlock"/>s and other members using the GIMPLE input file.
 		/// </summary>
 		/// <param name="gimple"><see cref="List{T}"/> of <see cref="string"/> from the GIMPLE source.</param>
@@ -107,7 +115,8 @@ namespace FlowGraph
 			if ( Iterations < 1 )
 				Iterations = 1;
 			Initialize ( gimple );
-			this.FileName = fileName;
+			this.FileName = Path.GetFileName ( fileName );
+			DumpGimple ( $"{Folder}\\Clean.GIMPLE" );
 		}
 
 		private void Initialize ( List<string> gimple )
@@ -330,6 +339,14 @@ namespace FlowGraph
 				this.GetVarsUsed ( );
 				this.BuildUsedToDeclMap ( );
 				this.BuildDUC ( );
+
+				if ( DumpIntermediateGimple )
+				{
+					var lhsFileName = Path.GetFileNameWithoutExtension ( FileName );
+					var rhsFileName = Path.GetFileNameWithoutExtension ( gFunc.FileName );
+					DumpGimple ( $"{Folder}\\{lhsFileName}_{rhsFileName}_pass_{times}.GIMPLE" );
+					DumpGimple ( $"{gFunc.Folder}\\{rhsFileName}_{lhsFileName}_pass_{times}.GIMPLE" );
+				}
 			}
 		}
 

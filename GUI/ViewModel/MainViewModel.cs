@@ -94,6 +94,16 @@ namespace GUI.ViewModel
 			}
 		}
 
+		public bool DumpIntermediateGimple
+		{
+			get => Settings.Instance.DumpIntermediateGimple;
+			set
+			{
+				Settings.Instance.DumpIntermediateGimple = value;
+				RaisePropertyChanged ( nameof ( DumpIntermediateGimple ) );
+			}
+		}
+
 		#endregion
 
 		public RelayCommand AddFileCommand { get; private set; }

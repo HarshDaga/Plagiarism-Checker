@@ -220,12 +220,13 @@
 						<Label
 							x:Name="lblRebuild"
 							Width="123"
-							Height="35"
-							Margin="10,15,0,0"
+							Height="30"
+							Margin="10,18,0,0"
 							HorizontalAlignment="Left"
 							VerticalAlignment="Top"
 							HorizontalContentAlignment="Right"
-							Content="Recompile:" VerticalContentAlignment="Center" />
+							VerticalContentAlignment="Center"
+							Content="Recompile:" />
 						<Controls:ToggleSwitchButton
 							x:Name="tglBtnRebuild"
 							Width="67"
@@ -233,7 +234,8 @@
 							Margin="138,18,0,0"
 							HorizontalAlignment="Left"
 							VerticalAlignment="Top"
-							IsChecked="{Binding Rebuild}" RenderTransformOrigin="0.588,0.18" />
+							IsChecked="{Binding Rebuild}"
+							RenderTransformOrigin="0.588,0.18" />
 						<Label
 							x:Name="lblBatchFile"
 							Width="123"
@@ -374,6 +376,23 @@
 							HorizontalAlignment="Left"
 							VerticalAlignment="Top"
 							Content="Iterations" />
+						<Controls:ToggleSwitchButton
+							x:Name="tglBtnDumpIntermediateGimple"
+							Width="67"
+							Height="30"
+							Margin="181,182,19.2,296"
+							VerticalContentAlignment="Center"
+							IsChecked="{Binding DumpIntermediateGimple}" />
+						<Label
+							x:Name="lblDumpIntermediateGimple"
+							Width="166"
+							Height="30"
+							Margin="10,182,0,0"
+							HorizontalAlignment="Left"
+							VerticalAlignment="Top"
+							HorizontalContentAlignment="Right"
+							VerticalContentAlignment="Center"
+							Content="Dump Intermediate Gimple:" />
 					</Grid>
 				</GroupBox>
 			</Grid>

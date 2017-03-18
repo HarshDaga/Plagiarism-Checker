@@ -87,7 +87,8 @@ namespace GUI.Model
 				gFunc = new GFunction ( optimizer.GIMPLE, FileName )
 				{
 					Threshold = Settings.Instance.Threshold,
-					Iterations = Settings.Instance.Iterations
+					Iterations = Settings.Instance.Iterations,
+					DumpIntermediateGimple = Settings.Instance.DumpIntermediateGimple
 				};
 			RaisePropertyChanged ( nameof ( Status ) );
 		}
