@@ -222,7 +222,8 @@ namespace GCC_Optimizer
 				{
 					try
 					{
-						f.Delete ( );
+						if ( f.Name.StartsWith ( Path.GetFileNameWithoutExtension ( FileName ) + "." ) )
+							f.Delete ( );
 					}
 					catch ( System.Exception ex )
 					{
@@ -245,7 +246,7 @@ namespace GCC_Optimizer
 			{
 				File.Move ( oldOptimizedGIMPLE, $"{dir.Name}\\{optimizedGIMPLE}" );
 				File.Move ( oldOptimizedDot, $"{dir.Name}\\{optimizedDot}" );
-				File.Copy ( FileName, $"{dir.Name}\\{FileName}" );
+				File.Copy ( FileName, $"{dir.Name}\\{FileName}", true );
 			}
 
 			OriginalGIMPLE = File.ReadAllLines ( $"{dir.Name}\\{optimizedGIMPLE}" ).ToList ( );
