@@ -242,3 +242,9 @@ ModelManifest.xml
 .fake/
 /Plagiarism Checker
 *.dgml
+/GUI/icon white.ico
+/GUI/icon transparent.ico
+/GUI/icon shadow.ico
+/GUI/icon white.ico
+/GUI/icon transparent.ico
+/GUI/icon shadow.ico

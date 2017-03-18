@@ -12,7 +12,7 @@
 	xmlns:metro="clr-namespace:MahApps.Metro;assembly=MahApps.Metro"
 	xmlns:metroIcons="http://metro.mahapps.com/winfx/xaml/iconpacks"
 	x:Name="mainWindow"
-	Title="Can't fool me!"
+	Title="Gonna Catch Em' All!"
 	Width="1280"
 	Height="720"
 	DataContext="{Binding Main, Source={StaticResource Locator}}"
@@ -89,41 +89,51 @@
 					x:Name="gridAddFiles"
 					Width="{Binding ActualWidth, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type gui:MainWindow}}}"
 					Margin="0,0,10,15">
-					<ListView
-						x:Name="listViewFiles"
-						Margin="275,120,275,120"
+					<DataGrid
+						x:Name="dataGridFiles"
+						Width="750"
+						Height="420"
+						Margin="16,64,16,0"
+						HorizontalAlignment="Center"
+						VerticalAlignment="Top"
 						dragDrop:DragDrop.DropHandler="{Binding}"
 						dragDrop:DragDrop.IsDropTarget="True"
+						AutoGenerateColumns="False"
 						BorderBrush="{DynamicResource AccentColorBrush}"
 						BorderThickness="2"
+						CanUserReorderColumns="False"
+						CanUserResizeRows="False"
+						FontSize="12"
 						IsSynchronizedWithCurrentItem="True"
 						IsTabStop="True"
 						ItemsSource="{Binding Files}"
-						SizeChanged="listViewFiles_SizeChanged">
-						<ListView.ItemContainerStyle>
-							<Style BasedOn="{StaticResource {x:Type ListViewItem}}" TargetType="{x:Type ListViewItem}">
-								<Setter Property="IsSelected" Value="{Binding Mode=TwoWay, Path=IsSelected}" />
+						Style="{StaticResource AzureDataGrid}"
+						TextOptions.TextHintingMode="Animated"
+						VirtualizingStackPanel.VirtualizationMode="Standard">
+						<DataGrid.RowStyle>
+							<Style BasedOn="{StaticResource {x:Type DataGridRow}}" TargetType="{x:Type DataGridRow}">
+								<Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}" />
+								<Style.Triggers>
+									<Trigger Property="IsSelected" Value="True">
+										<Setter Property="Background" Value="{DynamicResource AccentColorBrush}" />
+									</Trigger>
+								</Style.Triggers>
 							</Style>
-						</ListView.ItemContainerStyle>
-						<ListView.View>
-							<GridView AllowsColumnReorder="False">
-								<GridView.Columns>
-									<GridViewColumn Header="Selected">
-										<GridViewColumn.CellTemplate>
-											<DataTemplate>
-												<CheckBox HorizontalAlignment="Center" IsChecked="{Binding IsChecked}" />
-											</DataTemplate>
-										</GridViewColumn.CellTemplate>
-									</GridViewColumn>
-									<GridViewColumn
-										Width="Auto"
-										DisplayMemberBinding="{Binding FileName}"
-										Header="File Name" />
-									<GridViewColumn DisplayMemberBinding="{Binding Status}" Header="Status" />
-								</GridView.Columns>
-							</GridView>
-						</ListView.View>
-					</ListView>
+						</DataGrid.RowStyle>
+						<DataGrid.Columns>
+							<DataGridCheckBoxColumn Width="30" Binding="{Binding IsChecked}" />
+							<DataGridTextColumn
+								Width="*"
+								Binding="{Binding FileName}"
+								Header="File Name"
+								IsReadOnly="True" />
+							<DataGridTextColumn
+								Width="150"
+								Binding="{Binding Status}"
+								Header="Status"
+								IsReadOnly="True" />
+						</DataGrid.Columns>
+					</DataGrid>
 					<Grid
 						Height="38.4"
 						Margin="275,0,275,50"
@@ -142,7 +152,7 @@
 							Content="Delete" />
 						<Button
 							x:Name="btAdd"
-							Margin="5.6,0,10,0"
+							Margin="6,0,10,0"
 							VerticalAlignment="Top"
 							Command="{Binding AddFileCommand}"
 							Content="Add" />
@@ -165,33 +175,46 @@
 					x:Name="gridResults"
 					Width="{Binding ActualWidth, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type gui:MainWindow}}}"
 					Margin="0,0,10,15">
-					<ListView
-						x:Name="listViewResults"
-						Margin="275,120,275,120"
+					<DataGrid
+						x:Name="dataGridResults"
+						Width="750"
+						Height="495"
+						Margin="0,60,0,0"
+						HorizontalAlignment="Center"
+						VerticalAlignment="Top"
 						dragDrop:DragDrop.DropHandler="{Binding}"
 						dragDrop:DragDrop.IsDropTarget="True"
+						AutoGenerateColumns="False"
 						BorderBrush="{DynamicResource AccentColorBrush}"
-						BorderThickness="1"
+						BorderThickness="2"
+						CanUserReorderColumns="False"
+						CanUserResizeRows="False"
+						FontSize="12"
+						HeadersVisibility="Column"
 						IsSynchronizedWithCurrentItem="True"
 						IsTabStop="True"
 						ItemsSource="{Binding Results}"
-						SizeChanged="listViewResults_SizeChanged">
-						<ListView.View>
-							<GridView AllowsColumnReorder="False">
-								<GridView.Columns>
-									<GridViewColumn
-										Width="Auto"
-										DisplayMemberBinding="{Binding File1}"
-										Header="File 1" />
-									<GridViewColumn
-										Width="Auto"
-										DisplayMemberBinding="{Binding File2}"
-										Header="File 2" />
-									<GridViewColumn DisplayMemberBinding="{Binding StrPercentage}" Header="Similarity" />
-								</GridView.Columns>
-							</GridView>
-						</ListView.View>
-					</ListView>
+						RowHeaderWidth="0"
+						TextOptions.TextHintingMode="Animated"
+						VirtualizingStackPanel.VirtualizationMode="Standard">
+						<DataGrid.Columns>
+							<DataGridTextColumn
+								Width="1*"
+								Binding="{Binding File1}"
+								Header="File 1"
+								IsReadOnly="True" />
+							<DataGridTextColumn
+								Width="1*"
+								Binding="{Binding File2}"
+								Header="File 2"
+								IsReadOnly="True" />
+							<DataGridTextColumn
+								Width="100"
+								Binding="{Binding StrPercentage}"
+								Header="Percentage"
+								IsReadOnly="True" />
+						</DataGrid.Columns>
+					</DataGrid>
 				</Grid>
 			</TabItem>
 		</Controls:MetroAnimatedSingleRowTabControl>
@@ -201,7 +224,9 @@
 			Width="966"
 			Margin="0,0,0,0.4"
 			VerticalAlignment="Stretch"
+			d:IsHidden="True"
 			BorderBrush="{DynamicResource AccentColorBrush}"
+			BorderThickness="0"
 			IsPinned="False">
 			<Grid
 				x:Name="gridSettings"

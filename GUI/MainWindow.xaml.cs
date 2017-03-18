@@ -33,21 +33,6 @@ namespace GUI
 			tbtTheme.IsChecked = AppSettings.Default.Theme == "BaseLight";
 		}
 
-		private void listViewFiles_SizeChanged ( object sender, SizeChangedEventArgs e )
-		{
-			ListView listView = sender as ListView;
-			GridView gView = listView.View as GridView;
-
-			var workingWidth = listView.ActualWidth - 35; // take into account vertical scrollbar
-			var col1 = 75;
-			var col3 = 120;
-			var col2 = workingWidth - col1 - col3;
-
-			gView.Columns[0].Width = col1;
-			gView.Columns[1].Width = col2;
-			gView.Columns[2].Width = col3;
-		}
-
 		private void cbAccent_SelectionChanged ( object sender, SelectionChangedEventArgs e )
 		{
 			if ( cbAccent.SelectedItem is Accent selectedAccent )
