@@ -57,20 +57,5 @@ namespace GUI
 		{
 			flySettings.IsOpen = !flySettings.IsOpen;
 		}
-
-		private void listViewResults_SizeChanged ( object sender, SizeChangedEventArgs e )
-		{
-			ListView listView = sender as ListView;
-			GridView gView = listView.View as GridView;
-
-			var workingWidth = listView.ActualWidth - 20; // take into account vertical scrollbar
-			var col1 = .42;
-			var col2 = .42;
-			var col3 = .16;
-
-			gView.Columns[0].Width = col1 * workingWidth;
-			gView.Columns[1].Width = col2 * workingWidth;
-			gView.Columns[2].Width = col3 * workingWidth;
-		}
 	}
 }
