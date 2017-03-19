@@ -153,7 +153,7 @@ namespace GUI.ViewModel
 
 		private bool CanCompareFile ( ) => Files.Count ( f => f.IsChecked && !f.IsFaulty ) > 0;
 
-		private void CompareFile ( )
+		private async void CompareFile ( )
 		{
 			foreach ( var file in Files.Where ( f => f.IsChecked ) )
 			{
@@ -161,12 +161,12 @@ namespace GUI.ViewModel
 				{
 					case ProgramStatus.Uninitalized:
 					case ProgramStatus.Compiled:
-						file.Init ( );
+						await file.Init ( );
 						break;
 
 					case ProgramStatus.CompiledAndParsed:
 						if ( Rebuild )
-							file.Init ( );
+							await file.Init ( );
 						break;
 
 					default:
@@ -180,8 +180,8 @@ namespace GUI.ViewModel
 			{
 				for ( int j = i + 1; j < toCompare.Count; j++ )
 				{
-					var lhs = toCompare[i].gFunc;
-					var rhs = toCompare[j].gFunc;
+					var lhs = toCompare[i].GFunc;
+					var rhs = toCompare[j].GFunc;
 					result.Add ( new ResultItem ( lhs, rhs ) );
 				}
 			}

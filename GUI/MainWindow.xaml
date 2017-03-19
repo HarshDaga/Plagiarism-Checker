@@ -117,6 +117,9 @@
 									<Trigger Property="IsSelected" Value="True">
 										<Setter Property="Background" Value="{DynamicResource AccentColorBrush}" />
 									</Trigger>
+									<Trigger Property="IsMouseOver" Value="True">
+										<Setter Property="Background" Value="{DynamicResource AccentColorBrush3}" />
+									</Trigger>
 								</Style.Triggers>
 							</Style>
 						</DataGrid.RowStyle>

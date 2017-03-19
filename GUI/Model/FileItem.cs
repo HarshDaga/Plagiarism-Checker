@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using FlowGraph;
 using GalaSoft.MvvmLight;
 using GCC_Optimizer;
@@ -12,8 +13,8 @@ namespace GUI.Model
 		private bool _isChecked;
 		private bool _isSelected;
 
-		public Optimizer optimizer;
-		public GFunction gFunc;
+		private Optimizer optimizer;
+		private GFunction gFunc;
 
 		public string FileName
 		{
@@ -42,30 +43,40 @@ namespace GUI.Model
 		{
 			get
 			{
-				if ( optimizer == null )
+				if ( Optimizer == null )
 					return ProgramStatus.Uninitalized;
-				if ( optimizer.LastError == OptimizeResult.BadExtension )
+				if ( Optimizer.LastError == OptimizeResult.BadExtension )
 					return ProgramStatus.BadFileName;
-				if ( optimizer.LastError == OptimizeResult.FileNotFound )
+				if ( Optimizer.LastError == OptimizeResult.FileNotFound )
 					return ProgramStatus.FileNotFound;
-				if ( optimizer.LastError == OptimizeResult.CompileError )
+				if ( Optimizer.LastError == OptimizeResult.CompileError )
 					return ProgramStatus.CompileError;
-				if ( optimizer.LastError == OptimizeResult.None )
-					return ( gFunc == null ) ? ProgramStatus.Compiled : ProgramStatus.CompiledAndParsed;
+				if ( Optimizer.LastError == OptimizeResult.None )
+					return ( GFunc == null ) ? ProgramStatus.Compiled : ProgramStatus.CompiledAndParsed;
 				return ProgramStatus.Uninitalized;
 			}
 		}
+
+		public GFunction GFunc { get => this.gFunc; set => this.gFunc = value; }
+		public Optimizer Optimizer { get => this.optimizer; set => this.optimizer = value; }
 
 		public FileItem ( string fileName )
 		{
 			this.FileName = fileName;
 		}
 
-		public void InitOptimizer ( )
+		public void Reset ( )
+		{
+			this.optimizer = null;
+			this.GFunc = null;
+			RaisePropertyChanged ( nameof ( Status ) );
+		}
+
+		public async Task<ProgramStatus> InitOptimizer ( )
 		{
 			try
 			{
-				optimizer = new Optimizer ( _fileName )
+				Optimizer = new Optimizer ( _fileName )
 				{
 					BatchFile = Settings.Instance.BatchFile,
 					GccFlags = Settings.Instance.GccFlags.ToList ( ),
@@ -74,23 +85,40 @@ namespace GUI.Model
 					Rebuild = Settings.Instance.Rebuild
 				};
 				if ( !IsFaulty )
-					optimizer.Run ( );
+					await Task.Run ( ( ) => Optimizer.Run ( ) );
 			}
 			catch ( FileNotFoundException ) { }
+
+			return Status;
 		}
 
-		public void Init ( )
+		public async Task<ProgramStatus> InitFlowgraph ( )
 		{
-			if ( optimizer == null )
-				InitOptimizer ( );
 			if ( !IsFaulty )
-				gFunc = new GFunction ( optimizer.GIMPLE, FileName )
-				{
-					Threshold = Settings.Instance.Threshold,
-					Iterations = Settings.Instance.Iterations,
-					DumpIntermediateGimple = Settings.Instance.DumpIntermediateGimple
-				};
+			{
+				await Task.Run ( ( ) =>
+								{
+									GFunc = new GFunction ( Optimizer.GIMPLE, FileName )
+									{
+										Threshold = Settings.Instance.Threshold,
+										Iterations = Settings.Instance.Iterations,
+										DumpIntermediateGimple = Settings.Instance.DumpIntermediateGimple
+									};
+								}
+								);
+			}
+
+			return Status;
+		}
+
+		public async Task<ProgramStatus> Init ( )
+		{
+			if ( Optimizer == null )
+				await InitOptimizer ( );
+			await InitFlowgraph ( );
 			RaisePropertyChanged ( nameof ( Status ) );
+
+			return Status;
 		}
 	}
 }

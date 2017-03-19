@@ -225,7 +225,7 @@ namespace GCC_Optimizer
 						if ( f.Name.StartsWith ( Path.GetFileNameWithoutExtension ( FileName ) + "." ) )
 							f.Delete ( );
 					}
-					catch ( System.Exception ex )
+					catch ( System.Exception )
 					{
 					}
 				}
