@@ -345,7 +345,7 @@ namespace FlowGraph
 					var lhsFileName = Path.GetFileNameWithoutExtension ( FileName );
 					var rhsFileName = Path.GetFileNameWithoutExtension ( gFunc.FileName );
 					DumpGimple ( $"{Folder}\\{lhsFileName}_{rhsFileName}_pass_{times + 1}.GIMPLE" );
-					DumpGimple ( $"{gFunc.Folder}\\{rhsFileName}_{lhsFileName}_pass_{times + 1}.GIMPLE" );
+					gFunc.DumpGimple ( $"{gFunc.Folder}\\{rhsFileName}_{lhsFileName}_pass_{times + 1}.GIMPLE" );
 				}
 			}
 		}
