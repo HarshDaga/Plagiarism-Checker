@@ -148,6 +148,8 @@ namespace FlowGraph
 
 			Blocks = GBaseBlock.GetBaseBlocks ( body );
 
+			NormalizeConditionals ( );
+
 			GetVarsDecl ( body );
 
 			GetVarsUsed ( );
@@ -181,6 +183,89 @@ namespace FlowGraph
 				};
 				GVarsDecl.Add ( gVar );
 			}
+		}
+
+		private string NormalizeRelationalOperator ( string op )
+		{
+			Dictionary<string, string> dict = new Dictionary<string, string>
+			{
+				["=="] = "!=",
+				["!="] = "!=",
+				["<"] = "<",
+				["<="] = "<=",
+				[">"] = "<=",
+				[">="] = "<"
+			};
+
+			if ( dict.ContainsKey ( op ) )
+				return dict[op];
+			return op;
+		}
+
+		private void NormalizeConditionals ( )
+		{
+			foreach ( var bb in Blocks )
+			{
+				var conditionals = bb.GStatements.OfType<GCondStmt> ( ).ToList ( );
+				if ( conditionals.Count == 0 )
+					continue;
+				foreach ( var c in conditionals )
+				{
+					if ( c.Normalize ( ) )
+					{
+						if (
+							bb.GStatements.Count >= c.Linenum + 3 &&
+							bb.GStatements[c.Linenum + 1] is GGotoStmt &&
+							bb.GStatements[c.Linenum + 3] is GGotoStmt
+							)
+						{
+							int x = ( bb.GStatements[c.Linenum + 1] as GGotoStmt ).Number;
+							int y = ( bb.GStatements[c.Linenum + 3] as GGotoStmt ).Number;
+							SwapBaseBlocks ( x, y );
+							NormalizeConditionals ( );
+							return;
+						}
+					}
+				}
+			}
+		}
+
+		private void SwapBaseBlocks ( int x, int y )
+		{
+			var bbX = Blocks.FirstOrDefault ( b => b.Number == x );
+			var bbY = Blocks.FirstOrDefault ( b => b.Number == y );
+			if ( bbX == null || bbY == null )
+				return;
+
+			var xStatements = bbX.GStatements.ToList ( );
+			var yStatements = bbY.GStatements.ToList ( );
+
+			{
+				var temp = xStatements[0];
+				xStatements[0] = yStatements[0];
+				yStatements[0] = temp;
+				if (
+					xStatements.Count > 2 &&
+					xStatements.Last ( ) is GGotoStmt &&
+					!( xStatements[xStatements.Count - 2] is GElseStmt )
+					)
+				{
+					yStatements.Add ( xStatements.Last ( ) );
+					xStatements.Remove ( xStatements.Last ( ) );
+				}
+				else if (
+					yStatements.Count > 2 &&
+					yStatements.Last ( ) is GGotoStmt &&
+					!( yStatements[yStatements.Count - 2] is GElseStmt )
+					)
+				{
+					xStatements.Add ( yStatements.Last ( ) );
+					yStatements.Remove ( yStatements.Last ( ) );
+				}
+			}
+
+			bbX.GStatements = yStatements;
+			bbY.GStatements = xStatements;
 		}
 
 		private void GetVarsUsed ( )
@@ -354,6 +439,7 @@ namespace FlowGraph
 		/// This is messed up and probably stupid of me to implement...
 		/// </summary>
 		/// <param name="gFunc"></param>
+		[Obsolete ( "PreProcessLineByLine is obsolete, use PreProcess instead", true )]
 		private void PreProcessLineByLine ( GFunction gFunc )
 		{
 			var varMap = GetVarMap ( gFunc );
@@ -465,7 +551,7 @@ namespace FlowGraph
 			lhs.PreProcess ( rhs );
 			bool result = lhs.Blocks.SequenceEqual ( rhs.Blocks );
 
-			rhs.Initialize ( rhs.Gimple );
+			rhs.Reset ( );
 
 			return result;
 		}

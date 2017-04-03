@@ -16,12 +16,12 @@ namespace FlowGraph
 		/// <summary>
 		/// Block Number.
 		/// </summary>
-		public int Number { get; private set; }
+		public int Number { get; set; }
 
 		/// <summary>
 		/// <see cref="List{T}"/> of <see cref="GimpleStmt"/> containing all the statements used in the block.
 		/// </summary>
-		public List<GimpleStmt> GStatements { get; private set; } = new List<GimpleStmt> ( );
+		public List<GimpleStmt> GStatements { get; set; } = new List<GimpleStmt> ( );
 
 		/// <summary>
 		/// <see cref="List{T}"/> of <see cref="GimpleStmt"/> containing all the blocks referenced from <c>this</c> block.
@@ -128,6 +128,15 @@ namespace FlowGraph
 				GStatements[i].Linenum = i;
 		}
 
+		public bool EndsWithBranch ( )
+		{
+			if ( GStatements.Count < 3 )
+				return false;
+			if ( !( GStatements[GStatements.Count - 1] is GGotoStmt ) )
+				return false;
+			return GStatements[GStatements.Count - 1] is GElseStmt;
+		}
+
 		public HashSet<string> Rename ( string oldName, string newName )
 		{
 			Vars.Clear ( );
@@ -155,6 +164,11 @@ namespace FlowGraph
 		/// <returns></returns>
 		public static bool operator == ( GBaseBlock bb1, GBaseBlock bb2 )
 		{
+			if ( Object.ReferenceEquals ( bb1, null ) )
+				return Object.ReferenceEquals ( bb2, null );
+			else if ( Object.ReferenceEquals ( bb2, null ) )
+				return false;
+
 			return bb1.GStatements.SequenceEqual ( bb2.GStatements );
 		}
 
@@ -166,7 +180,7 @@ namespace FlowGraph
 		/// <returns></returns>
 		public static bool operator != ( GBaseBlock bb1, GBaseBlock bb2 )
 		{
-			return !bb1.GStatements.SequenceEqual ( bb2.GStatements );
+			return !( bb1 == bb2 );
 		}
 
 		/// <summary>

@@ -13,9 +13,9 @@ namespace FlowGraph
 	{
 		private static readonly string myPattern = @"if \((?<op1>[\w\.]*) (?<op>\S*) (?<op2>[\w\.]*)\)";
 
-		public string Op1 { get; private set; }
-		public string Op2 { get; private set; }
-		public string Op { get; private set; }
+		public string Op1 { get; set; }
+		public string Op2 { get; set; }
+		public string Op { get; set; }
 
 		public GCondStmt ( string text )
 		{
@@ -35,6 +35,37 @@ namespace FlowGraph
 		/// <param name="stmt"></param>
 		/// <returns></returns>
 		public static bool Matches ( string stmt ) => Regex.IsMatch ( stmt, myPattern );
+
+		private static string NormalizeRelationalOperator ( string op )
+		{
+			Dictionary<string, string> dict = new Dictionary<string, string>
+			{
+				["=="] = "!=",
+				["!="] = "!=",
+				["<"] = "<",
+				["<="] = "<=",
+				[">"] = "<=",
+				[">="] = "<"
+			};
+
+			if ( dict.ContainsKey ( op ) )
+				return dict[op];
+			return op;
+		}
+
+		public bool Normalize ( )
+		{
+			var normalized = NormalizeRelationalOperator ( Op );
+			if ( normalized == Op )
+				return false;
+
+			Op = normalized;
+			//var t = Op1;
+			//Op1 = Op2;
+			//Op2 = t;
+
+			return true;
+		}
 
 		public override string ToString ( ) => $"if ({Op1} {Op} {Op2})";
 
