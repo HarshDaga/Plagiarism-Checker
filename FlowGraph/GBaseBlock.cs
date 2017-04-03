@@ -128,15 +128,6 @@ namespace FlowGraph
 				GStatements[i].Linenum = i;
 		}
 
-		public bool EndsWithBranch ( )
-		{
-			if ( GStatements.Count < 3 )
-				return false;
-			if ( !( GStatements[GStatements.Count - 1] is GGotoStmt ) )
-				return false;
-			return GStatements[GStatements.Count - 1] is GElseStmt;
-		}
-
 		public HashSet<string> Rename ( string oldName, string newName )
 		{
 			Vars.Clear ( );
