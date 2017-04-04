@@ -14,7 +14,7 @@ namespace GCC_Optimizer
 	/// <summary>
 	/// Handles all GCC and dot related activities.
 	/// </summary>
-	[DebuggerDisplay ( "{fileName}" )]
+	[DebuggerDisplay ( "{FileName}" )]
 	public class Optimizer
 	{
 		public static class Defaults
