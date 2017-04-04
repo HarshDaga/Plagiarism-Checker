@@ -151,12 +151,13 @@ namespace GCC_Optimizer
 			var match = Regex.Match ( prog, pattern );
 			if ( !match.Value.Contains ( "flatten" ) )
 			{
-				var modified = Regex.Replace ( prog, @"(main\(.*\))", " __attribute__((flatten))$1" );
+				var modified = Regex.Replace ( prog, @"(main\s*\(.*\))", " __attribute__((flatten))$1" );
 				var fileStream = File.Open ( FileName, FileMode.Truncate );
 				var byteArray = Encoding.ASCII.GetBytes ( modified );
 				fileStream.Write ( byteArray, 0, byteArray.Length );
 				fileStream.Close ( );
 			}
+
 			return prog;
 		}
 
