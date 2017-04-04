@@ -577,7 +577,9 @@ namespace FlowGraph
 						correlation[v1] = new Dictionary<GVar, decimal> ( );
 					correlation[v1][v2] = v1.Map ( v2 );
 				}
-				var probable = correlation[v1]
+				var probable = new List<GVar> ( );
+				if ( correlation.Count != 0 )
+					probable = correlation[v1]
 					.Where ( x => x.Value != 0m )
 					.OrderBy ( x => x.Value * -1m )
 					.Select ( x => x.Key )
