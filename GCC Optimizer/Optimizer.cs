@@ -28,9 +28,12 @@ namespace GCC_Optimizer
 					"-fdump-tree-optimized-graph",
 					"-fexpensive-optimizations",
 					"-frerun-loop-opt",
-					"-funroll-all-loops",
 					"-fgcse",
-					"-fmerge-all-constants"
+					"-fmerge-all-constants",
+					"-fno-tree-vectorize",
+					"-fno-tree-copy-prop",
+					"-fno-guess-branch-probability",
+					"-fno-ivopts"
 				};
 
 			public static readonly List<string> Suffixes =
