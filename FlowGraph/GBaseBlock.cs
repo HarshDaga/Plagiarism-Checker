@@ -107,9 +107,13 @@ namespace FlowGraph
 					break;
 
 			GStatements =
-				GStatements.Take ( start )
-				 .Concat ( GStatements.GetRange ( start, end - start ).OrderBy ( s => ( s as GPhiStmt ).Assignee ) )
-				 .Concat ( GStatements.GetRange ( end, GStatements.Count - end ) ).
+				GStatements
+				.Take ( start )
+				.Concat ( GStatements.GetRange ( start, end - start )
+				.OfType<GPhiStmt> ( ).Where ( s => !s.Assignee.Contains ( "tmp" ) ).OrderBy ( s => s.Assignee ) )
+				.Concat ( GStatements.GetRange ( start, end - start )
+				.OfType<GPhiStmt> ( ).Where ( s => s.Assignee.Contains ( "tmp" ) ).OrderBy ( s => s.Assignee ) )
+				.Concat ( GStatements.GetRange ( end, GStatements.Count - end ) ).
 				 ToList ( );
 
 			RenumberLines ( );
