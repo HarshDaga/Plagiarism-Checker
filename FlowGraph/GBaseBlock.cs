@@ -98,6 +98,23 @@ namespace FlowGraph
 			return null;
 		}
 
+		private void ReorderPhiStatements ( )
+		{
+			int start = 1;
+			int end = 1;
+			for ( ; end < GStatements.Count; ++end )
+				if ( !( GStatements[end] is GPhiStmt ) )
+					break;
+
+			GStatements =
+				GStatements.Take ( start )
+				 .Concat ( GStatements.GetRange ( start, end - start ).OrderBy ( s => ( s as GPhiStmt ).Assignee ) )
+				 .Concat ( GStatements.GetRange ( end, GStatements.Count - end ) ).
+				 ToList ( );
+
+			RenumberLines ( );
+		}
+
 		/// <summary>
 		/// Create a <see cref="GBaseBlock"/> from the GIMPLE source containing content of the current Base Block.
 		/// </summary>
@@ -120,6 +137,8 @@ namespace FlowGraph
 				}
 				++line;
 			}
+
+			ReorderPhiStatements ( );
 		}
 
 		public void RenumberLines ( )
