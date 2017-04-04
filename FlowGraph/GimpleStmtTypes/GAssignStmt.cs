@@ -11,7 +11,7 @@ namespace FlowGraph
 	/// </summary>
 	public class GAssignStmt : GimpleStmt
 	{
-		private static readonly string myPattern = @"(?<assignee>[\w\.\[\]\,\ \:]*) = (?<var1>[\w\.\[\]\,\ \:]*)( (?<op>\S*) (?<var2>[\w\.]*))?;";
+		private static readonly string myPattern = @"(?<assignee>[\w\.\[\]\,\ \:\*\(\)]*) = (?<var1>[\w\.\[\]\,\ \:]*)( (?<op>\S*) (?<var2>[\w\.]*))?;";
 
 		private string _assignee;
 		private string _var1;
@@ -62,6 +62,17 @@ namespace FlowGraph
 			Var1 = match.Groups["var1"].Value;
 			Var2 = match.Groups["var2"].Value;
 			Op = match.Groups["op"].Value;
+
+			if ( Op == "+" || Op == "*" || Op == "|" || Op == "&" || Op == "^" )
+			{
+				if ( Var1.CompareTo ( Var2 ) > 0 )
+				{
+					var temp = Var1;
+					Var1 = Var2;
+					Var2 = temp;
+				}
+			}
+
 			Vars.AddRange ( new[] { Assignee, Var1, Var2 }.Where ( x => IsValidIdentifier ( x ) ) );
 		}
 		

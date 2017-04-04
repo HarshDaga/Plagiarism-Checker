@@ -26,6 +26,17 @@ namespace FlowGraph
 			Op1 = match.Groups["op1"].Value;
 			Op2 = match.Groups["op2"].Value;
 			Op = match.Groups["op"].Value;
+
+			if ( Op == "==" || Op == "!=" )
+			{
+				if ( Op1.CompareTo ( Op2 ) > 0 )
+				{
+					var temp = Op1;
+					Op1 = Op2;
+					Op2 = temp;
+				}
+			}
+
 			Vars.AddRange ( new[] { Op1, Op2 }.Where ( x => IsValidIdentifier ( x ) ) );
 		}
 		
@@ -60,9 +71,6 @@ namespace FlowGraph
 				return false;
 
 			Op = normalized;
-			//var t = Op1;
-			//Op1 = Op2;
-			//Op2 = t;
 
 			return true;
 		}
