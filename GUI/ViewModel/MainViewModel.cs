@@ -9,6 +9,8 @@ using GalaSoft.MvvmLight.CommandWpf;
 using GCC_Optimizer;
 using GongSolutions.Wpf.DragDrop;
 using GUI.Model;
+using LiveCharts;
+using LiveCharts.Defaults;
 
 namespace GUI.ViewModel
 {
@@ -21,6 +23,9 @@ namespace GUI.ViewModel
 		private ObservableCollection<FileItem> files;
 		private ObservableCollection<ResultItem> results;
 		private ObservableCollection<DotOutputFormatItem> dotOutputFormats;
+		private ChartValues<HeatPoint> resultHeatPoints;
+		private ObservableCollection<string> heatMapXAxis;
+		private ObservableCollection<string> heatMapYAxis;
 
 		#region Optimizer Settings
 
@@ -122,6 +127,24 @@ namespace GUI.ViewModel
 			set => Set ( nameof ( Results ), ref results, value );
 		}
 
+		public ChartValues<HeatPoint> ResultHeatPoints
+		{
+			get => resultHeatPoints;
+			set => Set ( nameof ( ResultHeatPoints ), ref resultHeatPoints, value );
+		}
+
+		public ObservableCollection<string> HeatMapXAxis
+		{
+			get => this.heatMapXAxis;
+			set => Set ( nameof ( HeatMapXAxis ), ref heatMapXAxis, value );
+		}
+
+		public ObservableCollection<string> HeatMapYAxis
+		{
+			get => this.heatMapYAxis;
+			set => Set ( nameof ( HeatMapYAxis ), ref heatMapYAxis, value );
+		}
+
 		/// <summary>
 		/// Initializes a new instance of the MainViewModel class.
 		/// </summary>
@@ -142,6 +165,9 @@ namespace GUI.ViewModel
 			this.DeleteFileCommand = new RelayCommand ( this.DeleteFile, this.CanDeleteFile );
 			this.CompareFileCommand = new RelayCommand ( this.CompareFile, this.CanCompareFile );
 			this.Files = new ObservableCollection<FileItem> ( );
+			this.ResultHeatPoints = new ChartValues<HeatPoint> ( );
+			this.HeatMapXAxis = new ObservableCollection<string> ( );
+			this.HeatMapYAxis = new ObservableCollection<string> ( );
 			this.dotOutputFormats = new ObservableCollection<DotOutputFormatItem> ( );
 			foreach ( var e in Enum.GetValues ( typeof ( DotOutputFormat ) ).Cast<DotOutputFormat> ( ) )
 				dotOutputFormats.Add ( new DotOutputFormatItem ( e ) );
@@ -176,13 +202,24 @@ namespace GUI.ViewModel
 
 			var result = new List<ResultItem> ( );
 			var toCompare = Files.Where ( f => f.IsChecked && f.Status == ProgramStatus.CompiledAndParsed ).ToList ( );
+			HeatMapXAxis.Clear ( );
+			HeatMapYAxis.Clear ( );
+			ResultHeatPoints.Clear ( );
+			foreach ( var f in toCompare.Select ( x => x.FileName ) )
+			{
+				HeatMapXAxis.Add ( f );
+				heatMapYAxis.Add ( f );
+			}
+
 			for ( int i = 0; i != toCompare.Count; ++i )
 			{
-				for ( int j = i + 1; j < toCompare.Count; j++ )
+				for ( int j = 0; j < toCompare.Count; j++ )
 				{
 					var lhs = toCompare[i].GFunc;
 					var rhs = toCompare[j].GFunc;
-					result.Add ( new ResultItem ( lhs, rhs ) );
+					var res = new ResultItem ( lhs, rhs );
+					result.Add ( res );
+					ResultHeatPoints.Add ( new HeatPoint ( i, j, (double) res.Percentage ) );
 				}
 			}
 			Results = new ObservableCollection<ResultItem> ( result.OrderBy ( x => x.Percentage * -1m ) );

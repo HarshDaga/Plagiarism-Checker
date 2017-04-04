@@ -94,12 +94,12 @@ namespace FlowGraph
 		public Dictionary<string, GVar> UsedToDeclMap { get; set; } = new Dictionary<string, GVar> ( );
 
 		/// <summary>
-		/// <see cref="Dictionary{TKey, TValue}"/> of <see cref="string"/> mapped to <see cref="GVar"/> by the variable name with its GIMPLE suffix.
+		/// <see cref="List{T}"/> of <see cref="GimpleStmt"/>s used in the whole function.
 		/// </summary>
 		public List<GimpleStmt> GStatements => Blocks.SelectMany ( b => b.GStatements ).ToList ( );
 
 		/// <summary>
-		/// <see cref="Dictionary{TKey, TValue}"/> of <see cref="string"/> mapped to <see cref="GVar"/> by the variable name with its GIMPLE suffix.
+		/// Whether or not the <see cref="GFunction"/> should be dumped after each round of processing.
 		/// </summary>
 		public bool DumpIntermediateGimple { get; set; } = Defaults.DumpIntermediateGimple;
 
@@ -183,23 +183,6 @@ namespace FlowGraph
 				};
 				GVarsDecl.Add ( gVar );
 			}
-		}
-
-		private string NormalizeRelationalOperator ( string op )
-		{
-			Dictionary<string, string> dict = new Dictionary<string, string>
-			{
-				["=="] = "!=",
-				["!="] = "!=",
-				["<"] = "<",
-				["<="] = "<=",
-				[">"] = "<=",
-				[">="] = "<"
-			};
-
-			if ( dict.ContainsKey ( op ) )
-				return dict[op];
-			return op;
 		}
 
 		private void NormalizeConditionals ( )
@@ -513,8 +496,13 @@ namespace FlowGraph
 			decimal count = 0;
 			var lhsStmts = GStatements;
 			var rhsStmts = gFunc.GStatements;
+			lhsStmts.RemoveAll ( s => s is GBBStmt );
+			rhsStmts.RemoveAll ( s => s is GBBStmt );
 			count = LevenshteinDistance ( lhsStmts, rhsStmts );
-			decimal result = 100m - 100m * count / Math.Max ( lhsStmts.Count, rhsStmts.Count );
+			decimal result = 
+				100m -
+				100m * count /
+				Math.Max ( lhsStmts.Count, rhsStmts.Count );
 
 			gFunc.Reset ( );
 

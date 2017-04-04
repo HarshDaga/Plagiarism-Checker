@@ -3,6 +3,7 @@ using System.Windows.Controls;
 using GUI.ViewModel;
 using MahApps.Metro;
 using MahApps.Metro.Controls;
+using LiveCharts;
 
 namespace GUI
 {
