@@ -111,9 +111,9 @@ namespace GUI.Model
 			return Status;
 		}
 
-		public async Task<ProgramStatus> Init ( )
+		public async Task<ProgramStatus> Init ( bool Rebuild )
 		{
-			if ( Optimizer == null )
+			if ( Optimizer == null || Rebuild )
 				await InitOptimizer ( );
 			await InitFlowgraph ( );
 			RaisePropertyChanged ( nameof ( Status ) );

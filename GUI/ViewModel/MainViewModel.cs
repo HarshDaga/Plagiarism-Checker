@@ -114,6 +114,7 @@ namespace GUI.ViewModel
 		public RelayCommand AddFileCommand { get; private set; }
 		public RelayCommand DeleteFileCommand { get; private set; }
 		public RelayCommand CompareFileCommand { get; private set; }
+		public RelayCommand ResetFileCommand { get; private set; }
 
 		public ObservableCollection<FileItem> Files
 		{
@@ -164,10 +165,12 @@ namespace GUI.ViewModel
 			this.AddFileCommand = new RelayCommand ( this.AddFile, this.CanAddFile );
 			this.DeleteFileCommand = new RelayCommand ( this.DeleteFile, this.CanDeleteFile );
 			this.CompareFileCommand = new RelayCommand ( this.CompareFile, this.CanCompareFile );
+			this.ResetFileCommand = new RelayCommand ( this.ResetFile, this.CanResetFile );
 			this.Files = new ObservableCollection<FileItem> ( );
 			this.ResultHeatPoints = new ChartValues<HeatPoint> ( );
 			this.HeatMapXAxis = new ObservableCollection<string> ( );
 			this.HeatMapYAxis = new ObservableCollection<string> ( );
+			this.Results = new ObservableCollection<ResultItem> ( );
 			this.dotOutputFormats = new ObservableCollection<DotOutputFormatItem> ( );
 			foreach ( var e in Enum.GetValues ( typeof ( DotOutputFormat ) ).Cast<DotOutputFormat> ( ) )
 				dotOutputFormats.Add ( new DotOutputFormatItem ( e ) );
@@ -176,6 +179,19 @@ namespace GUI.ViewModel
 		}
 
 		#region Button Commands
+
+		private bool CanResetFile ( ) => Files.Count ( f => f.IsChecked ) > 0;
+
+		private void ResetFile ( )
+		{
+			foreach ( var file in Files )
+				file.Reset ( );
+
+			this.ResultHeatPoints.Clear ( );
+			this.HeatMapXAxis.Clear ( );
+			this.HeatMapYAxis.Clear ( );
+			this.Results.Clear ( );
+		}
 
 		private bool CanCompareFile ( ) => Files.Count ( f => f.IsChecked && !f.IsFaulty ) > 0;
 
@@ -187,12 +203,12 @@ namespace GUI.ViewModel
 				{
 					case ProgramStatus.Uninitalized:
 					case ProgramStatus.Compiled:
-						await file.Init ( );
+						await file.Init ( Rebuild );
 						break;
 
 					case ProgramStatus.CompiledAndParsed:
 						if ( Rebuild )
-							await file.Init ( );
+							await file.Init ( Rebuild );
 						break;
 
 					default:
