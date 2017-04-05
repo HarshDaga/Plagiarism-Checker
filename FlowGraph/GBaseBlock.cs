@@ -35,6 +35,19 @@ namespace FlowGraph
 
 		public HashSet<string> Vars { get; private set; } = new HashSet<string> ( );
 
+		public (int start, int end, int count) PhiRange
+		{
+			get
+			{
+				int end = 1;
+				for ( ; end < GStatements.Count; ++end )
+					if ( !( GStatements[end] is GPhiStmt ) )
+						break;
+
+				return (1, end, end - 1);
+			}
+		}
+
 		/// <summary>
 		/// Extract all the <see cref="GBaseBlock"/>s from the given GIMPLE source.
 		/// </summary>
@@ -100,20 +113,14 @@ namespace FlowGraph
 
 		private void ReorderPhiStatements ( )
 		{
-			int start = 1;
-			int end = 1;
-			for ( ; end < GStatements.Count; ++end )
-				if ( !( GStatements[end] is GPhiStmt ) )
-					break;
-
 			GStatements =
 				GStatements
-				.Take ( start )
-				.Concat ( GStatements.GetRange ( start, end - start )
+				.Take ( PhiRange.start )
+				.Concat ( GStatements.GetRange ( PhiRange.start, PhiRange.count )
 				.OfType<GPhiStmt> ( ).Where ( s => !s.Assignee.Contains ( "tmp" ) ).OrderBy ( s => s.Assignee ) )
-				.Concat ( GStatements.GetRange ( start, end - start )
+				.Concat ( GStatements.GetRange ( PhiRange.start, PhiRange.count )
 				.OfType<GPhiStmt> ( ).Where ( s => s.Assignee.Contains ( "tmp" ) ).OrderBy ( s => s.Assignee ) )
-				.Concat ( GStatements.GetRange ( end, GStatements.Count - end ) ).
+				.Concat ( GStatements.GetRange ( PhiRange.end, GStatements.Count - PhiRange.end ) ).
 				 ToList ( );
 
 			RenumberLines ( );

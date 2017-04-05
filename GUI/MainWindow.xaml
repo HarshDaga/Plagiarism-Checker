@@ -224,7 +224,7 @@
 							<DataGridTextColumn
 								Width="100"
 								Binding="{Binding StrPercentage}"
-								Header="Percentage"
+								Header="Similarity"
 								IsReadOnly="True" />
 						</DataGrid.Columns>
 					</DataGrid>
@@ -238,10 +238,13 @@
 				<Grid
 					x:Name="gridHeatMap"
 					Width="{Binding ActualWidth, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type gui:MainWindow}}}"
-					Margin="0,0,10,15">
-					<lvc:CartesianChart DataTooltip="{x:Null}">
+					Margin="0,0,10,50">
+					<lvc:CartesianChart Margin="0,0,15,15" DataTooltip="{x:Null}">
 						<lvc:CartesianChart.Series>
-							<lvc:HeatSeries DataLabels="True" Values="{Binding ResultHeatPoints}">
+							<lvc:HeatSeries
+								Title="Similarity"
+								DataLabels="True"
+								Values="{Binding ResultHeatPoints}">
 
 								<!--
 									The GradientStopCollection is optional to define a custom gradient
@@ -475,5 +478,23 @@
 				</GroupBox>
 			</Grid>
 		</Controls:Flyout>
+		<Controls:MetroProgressBar
+			x:Name="pbComparing"
+			Height="30"
+			Margin="230,0,-0.4,0.4"
+			VerticalAlignment="Bottom"
+			IsEnabled="{Binding IsBusy}"
+			Value="{Binding Progress}" />
+		<TextBlock
+			x:Name="tbStatus"
+			Width="230"
+			Height="30"
+			Margin="0"
+			Padding="5"
+			HorizontalAlignment="Left"
+			VerticalAlignment="Bottom"
+			Text="{Binding Status}"
+			TextAlignment="Center"
+			TextWrapping="Wrap" />
 	</Grid>
 </Controls:MetroWindow>

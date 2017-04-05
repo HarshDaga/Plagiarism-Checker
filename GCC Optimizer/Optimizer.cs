@@ -33,7 +33,8 @@ namespace GCC_Optimizer
 					"-fno-tree-vectorize",
 					"-fno-tree-copy-prop",
 					"-fno-guess-branch-probability",
-					"-fno-ivopts"
+					"-fno-ivopts",
+					"-fassociative-math"
 				};
 
 			public static readonly List<string> Suffixes =

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.CommandWpf;
@@ -26,6 +27,9 @@ namespace GUI.ViewModel
 		private ChartValues<HeatPoint> resultHeatPoints;
 		private ObservableCollection<string> heatMapXAxis;
 		private ObservableCollection<string> heatMapYAxis;
+		private decimal _progress;
+		private bool isBusy;
+		private string _status;
 
 		#region Optimizer Settings
 
@@ -146,6 +150,28 @@ namespace GUI.ViewModel
 			set => Set ( nameof ( HeatMapYAxis ), ref heatMapYAxis, value );
 		}
 
+		public decimal Progress
+		{
+			get => this._progress;
+			set => Set ( nameof ( Progress ), ref _progress, value );
+		}
+
+		public bool IsBusy
+		{
+			get => this.isBusy;
+			set
+			{
+				Set ( nameof ( IsBusy ), ref isBusy, value );
+				if ( !isBusy )
+					Progress = 0m;
+			}
+		}
+		public string Status
+		{
+			get => this._status;
+			set => Set ( nameof ( Status ), ref _status, value );
+		}
+
 		/// <summary>
 		/// Initializes a new instance of the MainViewModel class.
 		/// </summary>
@@ -172,6 +198,8 @@ namespace GUI.ViewModel
 			this.HeatMapYAxis = new ObservableCollection<string> ( );
 			this.Results = new ObservableCollection<ResultItem> ( );
 			this.dotOutputFormats = new ObservableCollection<DotOutputFormatItem> ( );
+			this.IsBusy = false;
+			this.Progress = 0m;
 			foreach ( var e in Enum.GetValues ( typeof ( DotOutputFormat ) ).Cast<DotOutputFormat> ( ) )
 				dotOutputFormats.Add ( new DotOutputFormatItem ( e ) );
 
@@ -197,6 +225,10 @@ namespace GUI.ViewModel
 
 		private async void CompareFile ( )
 		{
+			this.IsBusy = true;
+			this.Status = "Status: Compiling Files";
+			decimal checkedFilesCount = Files.Count ( f => f.IsChecked );
+			decimal counter = 0m;
 			foreach ( var file in Files.Where ( f => f.IsChecked ) )
 			{
 				switch ( file.Status )
@@ -214,30 +246,47 @@ namespace GUI.ViewModel
 					default:
 						break;
 				}
+				this.Progress = 100m * counter++ / checkedFilesCount;
 			}
+			this.Status = "Status: Idle";
+			this.IsBusy = false;
 
 			var result = new List<ResultItem> ( );
+			Results = new ObservableCollection<ResultItem> ( );
 			var toCompare = Files.Where ( f => f.IsChecked && f.Status == ProgramStatus.CompiledAndParsed ).ToList ( );
 			HeatMapXAxis.Clear ( );
 			HeatMapYAxis.Clear ( );
 			ResultHeatPoints.Clear ( );
+			ResultHeatPoints.Add ( new HeatPoint ( 0, 0, 0 ) );
 			foreach ( var f in toCompare.Select ( x => x.FileName ) )
 			{
 				HeatMapXAxis.Add ( f );
 				heatMapYAxis.Add ( f );
 			}
 
-			for ( int i = 0; i != toCompare.Count; ++i )
-			{
-				for ( int j = 0; j < toCompare.Count; j++ )
-				{
-					var lhs = toCompare[i].GFunc;
-					var rhs = toCompare[j].GFunc;
-					var res = new ResultItem ( lhs, rhs );
-					result.Add ( res );
-					ResultHeatPoints.Add ( new HeatPoint ( i, j, (double) res.Percentage ) );
-				}
-			}
+			this.IsBusy = true;
+			this.Status = "Status: Comparing";
+			await Task.Run ( ( ) =>
+								{
+									for ( int i = 0; i != toCompare.Count; ++i )
+									{
+										for ( int j = 0; j < toCompare.Count; j++ )
+										{
+											var lhs = toCompare[i].GFunc;
+											var rhs = toCompare[j].GFunc;
+											var res = new ResultItem ( lhs, rhs );
+											this.Progress =
+											100m * ( i * toCompare.Count + j + 1 )
+											/
+											( toCompare.Count * toCompare.Count );
+											result.Add ( res );
+											ResultHeatPoints.Add ( new HeatPoint ( i, j, (double) res.Percentage ) );
+										}
+									}
+								}
+								);
+			this.Status = "Status: Idle";
+			this.IsBusy = false;
 			Results = new ObservableCollection<ResultItem> ( result.OrderBy ( x => x.Percentage * -1m ) );
 		}
 
