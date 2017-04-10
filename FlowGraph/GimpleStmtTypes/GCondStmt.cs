@@ -40,7 +40,7 @@ namespace FlowGraph
 
 			Vars.AddRange ( new[] { Op1, Op2 }.Where ( x => IsValidIdentifier ( x ) ) );
 		}
-		
+
 		/// <summary>
 		/// Compare given <paramref name="stmt"/> to <see cref="myPattern"/> using <see cref="Regex"/>.
 		/// </summary>
@@ -58,6 +58,23 @@ namespace FlowGraph
 				["<="] = "<=",
 				[">"] = "<=",
 				[">="] = "<"
+			};
+
+			if ( dict.ContainsKey ( op ) )
+				return dict[op];
+			return op;
+		}
+
+		private static string FlipRelationalOperator ( string op )
+		{
+			Dictionary<string, string> dict = new Dictionary<string, string>
+			{
+				["=="] = "==",
+				["!="] = "!=",
+				["<"] = "<",
+				["<="] = "<=",
+				[">"] = "<",
+				[">="] = "<="
 			};
 
 			if ( dict.ContainsKey ( op ) )
@@ -102,8 +119,8 @@ namespace FlowGraph
 					return true;
 			}
 
-			var lhsOp = NormalizeRelationalOperator(lhs.Op);
-			var rhsOp = NormalizeRelationalOperator(rhs.Op);
+			var lhsOp = FlipRelationalOperator ( lhs.Op );
+			var rhsOp = FlipRelationalOperator ( rhs.Op );
 			string lhsOp1, lhsOp2, rhsOp1, rhsOp2;
 
 			if ( lhsOp != lhs.Op )

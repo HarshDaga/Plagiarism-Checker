@@ -532,7 +532,10 @@ namespace FlowGraph
 			{
 				lhs.Reset ( lhsFlag.doNormalizeConditionals, lhsFlag.doReorderPhi );
 				foreach ( var rhsFlag in flags )
+				{
+					rhs.Reset ( rhsFlag.doNormalizeConditionals, rhsFlag.doReorderPhi );
 					results.Add ( lhs.Compare ( rhs, rhsFlag.doNormalizeConditionals, rhsFlag.doReorderPhi ) );
+				}
 			}
 
 			return results.Max ( );
