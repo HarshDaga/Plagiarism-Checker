@@ -38,7 +38,7 @@ namespace GUI.Model
 			gFunc2 = rhs;
 			File1 = lhs.FileName;
 			File2 = rhs.FileName;
-			Percentage = Math.Round ( lhs.Compare ( rhs ), 2 );
+			Percentage = Math.Round ( GFunction.Compare ( lhs, rhs ), 2 );
 		}
 	}
 }

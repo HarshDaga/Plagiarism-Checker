@@ -119,7 +119,7 @@ namespace FlowGraph
 			DumpGimple ( $"{Folder}\\Clean.GIMPLE" );
 		}
 
-		private void Initialize ( List<string> gimple )
+		private void Initialize ( List<string> gimple, bool doNormalizeConditionals = false, bool doReorderPhi = false )
 		{
 			this.Gimple = gimple;
 			string pattern = @";; Function (?<name>\S*) \((\S*, funcdef_no=(?<funcdef_no>[0-9]*), decl_uid=(?<decl_uid>[0-9]*), cgraph_uid=[0-9]*, symbol_order=(?<symbol_order>[0-9]*))\).*";
@@ -146,9 +146,10 @@ namespace FlowGraph
 				body.Add ( line );
 			}
 
-			Blocks = GBaseBlock.GetBaseBlocks ( body );
+			Blocks = GBaseBlock.GetBaseBlocks ( body, doReorderPhi );
 
-			NormalizeConditionals ( );
+			if ( doNormalizeConditionals )
+				NormalizeConditionals ( );
 
 			GetVarsDecl ( body );
 
@@ -196,6 +197,14 @@ namespace FlowGraph
 				{
 					if ( c.Normalize ( ) )
 					{
+						if ( bb.GStatements.Count >= c.Linenum + 3 )
+						{
+							int x = ( bb.GStatements[c.Linenum + 1] as GGotoStmt ).Number;
+							int y = ( bb.GStatements[c.Linenum + 3] as GGotoStmt ).Number;
+							SwapBaseBlocks ( x, y );
+							NormalizeConditionals ( );
+						}
+						return;
 						if (
 							bb.GStatements.Count >= c.Linenum + 3 &&
 							bb.GStatements[c.Linenum + 1] is GGotoStmt &&
@@ -227,24 +236,24 @@ namespace FlowGraph
 				var temp = xStatements[0];
 				xStatements[0] = yStatements[0];
 				yStatements[0] = temp;
-				if (
-					xStatements.Count > 2 &&
-					xStatements.Last ( ) is GGotoStmt &&
-					!( xStatements[xStatements.Count - 2] is GElseStmt )
-					)
-				{
-					yStatements.Add ( xStatements.Last ( ) );
-					xStatements.Remove ( xStatements.Last ( ) );
-				}
-				else if (
-					yStatements.Count > 2 &&
-					yStatements.Last ( ) is GGotoStmt &&
-					!( yStatements[yStatements.Count - 2] is GElseStmt )
-					)
-				{
-					xStatements.Add ( yStatements.Last ( ) );
-					yStatements.Remove ( yStatements.Last ( ) );
-				}
+				//if (
+				//	xStatements.Count > 2 &&
+				//	xStatements.Last ( ) is GGotoStmt &&
+				//	!( xStatements[xStatements.Count - 2] is GElseStmt )
+				//	)
+				//{
+				//	yStatements.Add ( xStatements.Last ( ) );
+				//	xStatements.Remove ( xStatements.Last ( ) );
+				//}
+				//else if (
+				//	yStatements.Count > 2 &&
+				//	yStatements.Last ( ) is GGotoStmt &&
+				//	!( yStatements[yStatements.Count - 2] is GElseStmt )
+				//	)
+				//{
+				//	xStatements.Add ( yStatements.Last ( ) );
+				//	yStatements.Remove ( yStatements.Last ( ) );
+				//}
 			}
 
 			bbX.GStatements = yStatements;
@@ -490,7 +499,7 @@ namespace FlowGraph
 			return distances[lengthA, lengthB];
 		}
 
-		public decimal Compare ( GFunction gFunc )
+		public decimal Compare ( GFunction gFunc, bool doNormalizeConditionals = false, bool doReorderPhi = false )
 		{
 			PreProcess ( gFunc );
 			decimal count = 0;
@@ -504,9 +513,29 @@ namespace FlowGraph
 				100m * count /
 				Math.Max ( lhsStmts.Count, rhsStmts.Count );
 
-			gFunc.Reset ( );
+			gFunc.Reset ( doNormalizeConditionals, doReorderPhi );
 
 			return result;
+		}
+
+		public static decimal Compare ( GFunction lhs, GFunction rhs )
+		{
+			var results = new List<decimal> ( );
+			var flags = new List<(bool doNormalizeConditionals, bool doReorderPhi)>
+			{
+				(false, false),
+				(false, true),
+				(true, false),
+				(true, true)
+			};
+			foreach ( var lhsFlag in flags )
+			{
+				lhs.Reset ( lhsFlag.doNormalizeConditionals, lhsFlag.doReorderPhi );
+				foreach ( var rhsFlag in flags )
+					results.Add ( lhs.Compare ( rhs, rhsFlag.doNormalizeConditionals, rhsFlag.doReorderPhi ) );
+			}
+
+			return results.Max ( );
 		}
 
 		public void DumpGimple ( string path )
@@ -521,7 +550,8 @@ namespace FlowGraph
 			}
 		}
 
-		public void Reset ( ) => Initialize ( Gimple );
+		public void Reset ( bool doNormalizeConditionals = false, bool doReorderPhi = false ) =>
+			Initialize ( Gimple, doNormalizeConditionals, doReorderPhi );
 
 		/// <summary>
 		/// Compare the <see cref="GFunction.Blocks"/> of both <see cref="GFunction"/> using <code>SequenceEqual()</code>.

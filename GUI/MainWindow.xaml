@@ -255,7 +255,7 @@
 									<GradientStop Offset="0" Color="Green" />
 									<GradientStop Offset=".25" Color="YellowGreen" />
 									<GradientStop Offset=".50" Color="GreenYellow" />
-									<GradientStop Offset=".75" Color="Yellow" />
+									<GradientStop Offset=".75" Color="Chocolate" />
 									<GradientStop Offset="1" Color="Red" />
 								</lvc:HeatSeries.GradientStopCollection>
 							</lvc:HeatSeries>

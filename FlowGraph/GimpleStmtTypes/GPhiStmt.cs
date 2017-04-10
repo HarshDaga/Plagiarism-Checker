@@ -11,7 +11,7 @@ namespace FlowGraph
 	/// </summary>
 	public class GPhiStmt : GimpleStmt
 	{
-		private static readonly string myPattern = @"# (?<assignee>[\w\.]*) = PHI <(?<branches>(([\w\.]*)\((\S*)\)(, )?)+)>";
+		private static readonly string myPattern = @"# (?<assignee>[\w\.]*) = PHI <(?<branches>(([\w\.\-\&\*]*)\((\S*)\)(, )?)+)>";
 
 		public string Assignee { get; private set; }
 		public List<(string v, string bb)> Branches { get; set; } = new List<(string v, string bb)> ( );

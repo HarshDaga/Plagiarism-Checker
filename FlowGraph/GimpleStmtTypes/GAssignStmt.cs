@@ -1,6 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System;
 
 #pragma warning disable CS1591
 
@@ -11,7 +13,7 @@ namespace FlowGraph
 	/// </summary>
 	public class GAssignStmt : GimpleStmt
 	{
-		private static readonly string myPattern = @"(?<assignee>[\w\.\[\]\,\ \:\*\(\)]*) = (?<var1>[\w\.\[\]\,\ \:]*)( (?<op>\S*) (?<var2>[\w\.]*))?;";
+		private static readonly string myPattern = @"(?<assignee>[\w\.\[\]\,\ \:\*\(\)]*) = (?<var1>[\w\.\-\&\[\]\,\ \:\*]*)( (?<op>\S*) (?<var2>[\w\.\-\&\*]*))?;";
 
 		private string _assignee;
 		private string _var1;
@@ -63,15 +65,15 @@ namespace FlowGraph
 			Var2 = match.Groups["var2"].Value;
 			Op = match.Groups["op"].Value;
 
-			if ( Op == "+" || Op == "*" || Op == "|" || Op == "&" || Op == "^" )
-			{
-				if ( Var1.CompareTo ( Var2 ) > 0 )
-				{
-					var temp = Var1;
-					Var1 = Var2;
-					Var2 = temp;
-				}
-			}
+			//if ( Op == "+" || Op == "*" || Op == "|" || Op == "&" || Op == "^" )
+			//{
+			//	if ( Var1.CompareTo ( Var2 ) > 0 )
+			//	{
+			//		var temp = Var1;
+			//		Var1 = Var2;
+			//		Var2 = temp;
+			//	}
+			//}
 
 			Vars.AddRange ( new[] { Assignee, Var1, Var2 }.Where ( x => IsValidIdentifier ( x ) ) );
 		}
@@ -132,5 +134,43 @@ namespace FlowGraph
 			}
 			return base.Rename ( oldName, newName );
 		}
+
+		public static bool operator == ( GAssignStmt lhs, GAssignStmt rhs )
+		{
+			if ( Object.ReferenceEquals ( lhs, null ) )
+				return Object.ReferenceEquals ( rhs, null );
+			else if ( Object.ReferenceEquals ( rhs, null ) )
+				return false;
+
+			if ( lhs.Assignee != rhs.Assignee )
+				return false;
+
+			if ( lhs.Op == "+" || lhs.Op == "*" ||
+				lhs.Op == "|" || lhs.Op == "&" ||
+				lhs.Op == "^" )
+			{
+				if ( lhs.Var1 == rhs.Var1 && lhs.Var2 == rhs.Var2 && lhs.Op == rhs.Op )
+					return true;
+				if ( lhs.Var1 == rhs.Var2 && lhs.Var2 == rhs.Var1 && lhs.Op == rhs.Op )
+					return true;
+			}
+
+			return lhs.ToString ( ) == rhs.ToString ( );
+		}
+
+		public static bool operator != ( GAssignStmt lhs, GAssignStmt rhs )
+		{
+			return !( lhs == rhs );
+		}
+
+		public override bool Equals ( object obj )
+		{
+			if ( obj is GAssignStmt )
+				return ( obj as GAssignStmt ) == this;
+			else
+				return false;
+		}
+
+		public override int GetHashCode ( ) => base.GetHashCode ( );
 	}
 }

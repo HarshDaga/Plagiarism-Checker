@@ -55,7 +55,7 @@ namespace FlowGraph
 		/// <returns>
 		/// <see cref="List{T}"/> of <see cref="GBaseBlock"/> containing all the Base Blocks.
 		/// </returns>
-		public static List<GBaseBlock> GetBaseBlocks ( List<string> gimple )
+		public static List<GBaseBlock> GetBaseBlocks ( List<string> gimple, bool doReorderPhi = false )
 		{
 			Block block = new Block ( );
 			List<Block> blocks = new List<Block> ( );
@@ -77,7 +77,7 @@ namespace FlowGraph
 
 			List<GBaseBlock> baseBlocks = new List<GBaseBlock> ( );
 			foreach ( var b in blocks )
-				baseBlocks.Add ( new GBaseBlock ( b ) );
+				baseBlocks.Add ( new GBaseBlock ( b, doReorderPhi ) );
 			return baseBlocks;
 		}
 
@@ -130,7 +130,7 @@ namespace FlowGraph
 		/// Create a <see cref="GBaseBlock"/> from the GIMPLE source containing content of the current Base Block.
 		/// </summary>
 		/// <param name="block">GIMPLE source for current block.</param>
-		public GBaseBlock ( List<string> block )
+		public GBaseBlock ( List<string> block, bool doReorderPhi = false )
 		{
 			if ( block.Count == 0 )
 				throw new ArgumentOutOfRangeException ( );
@@ -149,7 +149,11 @@ namespace FlowGraph
 				++line;
 			}
 
-			ReorderPhiStatements ( );
+			if ( !( GStatements.Last ( ) is GGotoStmt ) )
+				GStatements.Add ( new GGotoStmt ( $"goto <bb {Number + 1}>;" ) );
+
+			if ( doReorderPhi )
+				ReorderPhiStatements ( );
 		}
 
 		public void RenumberLines ( )

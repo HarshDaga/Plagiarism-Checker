@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 
@@ -11,7 +12,7 @@ namespace FlowGraph
 	/// </summary>
 	public class GCondStmt : GimpleStmt
 	{
-		private static readonly string myPattern = @"if \((?<op1>[\w\.]*) (?<op>\S*) (?<op2>[\w\.]*)\)";
+		private static readonly string myPattern = @"if \((?<op1>[\w\.\-\&\*]*) (?<op>\S*) (?<op2>[\w\.\-\&\*]*)\)";
 
 		public string Op1 { get; set; }
 		public string Op2 { get; set; }
@@ -27,15 +28,15 @@ namespace FlowGraph
 			Op2 = match.Groups["op2"].Value;
 			Op = match.Groups["op"].Value;
 
-			if ( Op == "==" || Op == "!=" )
-			{
-				if ( Op1.CompareTo ( Op2 ) > 0 )
-				{
-					var temp = Op1;
-					Op1 = Op2;
-					Op2 = temp;
-				}
-			}
+			//if ( Op == "==" || Op == "!=" )
+			//{
+			//	if ( Op1.CompareTo ( Op2 ) > 0 )
+			//	{
+			//		var temp = Op1;
+			//		Op1 = Op2;
+			//		Op2 = temp;
+			//	}
+			//}
 
 			Vars.AddRange ( new[] { Op1, Op2 }.Where ( x => IsValidIdentifier ( x ) ) );
 		}
@@ -85,5 +86,63 @@ namespace FlowGraph
 				Op2 = newName;
 			return base.Rename ( oldName, newName );
 		}
+
+		public static bool operator == ( GCondStmt lhs, GCondStmt rhs )
+		{
+			if ( Object.ReferenceEquals ( lhs, null ) )
+				return Object.ReferenceEquals ( rhs, null );
+			else if ( Object.ReferenceEquals ( rhs, null ) )
+				return false;
+
+			if ( lhs.Op == "==" || lhs.Op == "!=" )
+			{
+				if ( lhs.Op1 == rhs.Op1 && lhs.Op2 == rhs.Op2 && lhs.Op == rhs.Op )
+					return true;
+				if ( lhs.Op1 == rhs.Op2 && lhs.Op2 == rhs.Op1 && lhs.Op == rhs.Op )
+					return true;
+			}
+
+			var lhsOp = NormalizeRelationalOperator(lhs.Op);
+			var rhsOp = NormalizeRelationalOperator(rhs.Op);
+			string lhsOp1, lhsOp2, rhsOp1, rhsOp2;
+
+			if ( lhsOp != lhs.Op )
+			{
+				lhsOp1 = lhs.Op2;
+				lhsOp2 = lhs.Op1;
+			}
+			else
+			{
+				lhsOp1 = lhs.Op1;
+				lhsOp2 = lhs.Op2;
+			}
+			if ( rhsOp != rhs.Op )
+			{
+				rhsOp1 = rhs.Op2;
+				rhsOp2 = rhs.Op1;
+			}
+			else
+			{
+				rhsOp1 = rhs.Op1;
+				rhsOp2 = rhs.Op2;
+			}
+
+			return ( lhsOp1 == rhsOp1 && lhsOp2 == rhsOp2 && lhsOp == rhsOp );
+		}
+
+		public static bool operator != ( GCondStmt lhs, GCondStmt rhs )
+		{
+			return !( lhs == rhs );
+		}
+
+		public override bool Equals ( object obj )
+		{
+			if ( obj is GCondStmt )
+				return ( obj as GCondStmt ) == this;
+			else
+				return false;
+		}
+
+		public override int GetHashCode ( ) => base.GetHashCode ( );
 	}
 }
