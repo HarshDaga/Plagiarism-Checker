@@ -256,7 +256,7 @@
 									<GradientStop Offset=".25" Color="YellowGreen" />
 									<GradientStop Offset=".50" Color="GreenYellow" />
 									<GradientStop Offset=".75" Color="Chocolate" />
-									<GradientStop Offset="1" Color="Red" />
+									<GradientStop Offset="1" Color="DarkRed" />
 								</lvc:HeatSeries.GradientStopCollection>
 							</lvc:HeatSeries>
 						</lvc:CartesianChart.Series>
